@@ -226,23 +226,14 @@ sudoku.solver = function() {
       // break out the set theory to expose a few more exclusions. This is
       // computationally expensive but only necessary once or twice on hard
       // puzzles.
-      //
-      // My Theorem:
-      // On a single row, tile or square, let there be M numbers (N in (n0, n1,
-      // ... nM)
-      // who all have exactly the same M possibilities (P in (p0, p1, ... pM).
-      // Then you can safely exclude all _other_ numbers !N from P.
-      //
-      // That just means that if you have two spots, and you know that both
-      // of them have to be either a 3 or a 4, and neither the 3 or 4 can be
-      // anywhere else, then you can exclude all other numbers from those spots.
-      //
-      // This can be abstracted to 3 numbers && 3 spots, or more, but 2 is most
-      // common. (Actually, ONE is the most common but we've covered that one
-      // already).
 
-      /* Still haven't figured out how I'm gonna code this part.... */
-
+      // ExclusionResults is an array of objects where each object has 'number',
+      // 'row' and 'col'.
+      var exclusionResults = _combineExclusionMatrices();
+      exclusionResults.forEach(function(e) {
+        _excludeCell(e.number, e.row, e.col);
+        changeBit = 1;
+      });
       return changeBit;
     }
 
@@ -266,6 +257,119 @@ sudoku.solver = function() {
         result.push(row);
       }
       return result;
+    }
+
+    /**
+     * Combines exclusion matrices to yield new number exclusions.
+     */
+    // My Theorem:
+    // On a single row, tile or square, let there be M numbers (N in (n0, n1,
+    // ... nM)
+    // who all have exactly the same M possibilities (P in (p0, p1, ... pM).
+    // Then you can safely exclude all _other_ numbers !N from P.
+    //
+    // That just means that if you have two spots, and you know that both
+    // of them have to be either a 3 or a 4, and neither the 3 or 4 can be
+    // anywhere else, then you can exclude all other numbers from those spots.
+    //
+    // This can be abstracted to 3 numbers && 3 spots, or more, but 2 is most
+    // common. (Actually, ONE is the most common but we've covered that one
+    // already).
+    function _combineExclusionMatrices() {
+      var results = [];
+
+      // Iterate over 2 choices up to 8.
+      var candidateNumbers = [ 1, 2, 3, 4, 5, 6, 7, 8, 9 ];
+      var combinations = [];
+      for (let r = 2; r < 3; r++) {
+
+        // If we have already discovered an exclusion zone from this exercise,
+        // exit the loop and solve the puzzle with more traditional means.
+        if (results.length) {
+          return results;
+        }
+
+        // The possible ways of combining r numbers from 1 to 9.
+        var comparableSets = sudoku.combinations.getCombinations(
+            candidateNumbers, r).combinations;
+        for (var iSet = 0; iSet < comparableSets.length; iSet++) {
+
+          // The numbers that actually get compared (like "1,2,5").
+          var numbersToCompare = comparableSets[iSet];
+
+          // The numbers that weren't chosen.
+          var numbersNotChosen = candidateNumbers.filter(function(num) {
+            return (numbersToCompare.indexOf(num) < 0);
+          });
+
+          // I pick one number to compare its exclusion matrix
+          // against the others.
+          // Which one I pick isn't important, because I'm only
+          // interested in places where they ALL match.
+          var chosenNumber = numbersToCompare[0];
+          var alternateNumbers = numbersToCompare.slice(1);
+
+          var discrepencyResult = _getEmptyGrid(9, 9);
+          for ( var iAlternate in alternateNumbers) {
+            alternateNumber = alternateNumbers[iAlternate];
+
+            var a = _exclusionMatrix[chosenNumber - 1];
+            var b = _exclusionMatrix[alternateNumber - 1];
+
+            var discrepency = _exclusion_XOR_exclusion(a, b);
+            discrepencyResult = _exclusion_OR_exclusion(discrepency,
+                discrepencyResult);
+          }
+
+          // So now, this big discrepencyResult matrix should contain a list of
+          // ALL the places across all the numbersToCompare where the
+          // possibilities didn't completely coincide.
+          //
+          // What we do now is check each possibility for our chosen number. As
+          // long as it doesn't share all of(row, column, square) with a
+          // discrepency, it should be safe to exclude all numbersNotChosen from
+          // that spot.
+          var chosenNumberExclusionMatrix = _exclusionMatrix[chosenNumber - 1];
+          var chosenNumberPossibilityMatrix = _invertExclusionMatrix(chosenNumberExclusionMatrix);
+          var chosenPossibilities = _getOccurrancesInMatrix(
+              chosenNumberPossibilityMatrix, true);
+
+          // Get a list of all the spots where discrepencies were found.
+          var discrepencyAreas = _getOccurrancesInMatrix(discrepencyResult,
+              true);
+
+          // Now check each possibility and determine if the numbersNotChosen
+          // can be excluded.
+          chosenPossibilities
+              .forEach(function(poss) {
+                // Possibility must not coincide with a discrepency, or share a
+                // row, column and square with one.
+                var discrepenciesSharingRowColSquare = discrepencyAreas
+                    .filter(function(disc) {
+                      return (disc.row === poss.row && disc.col === poss.col && disc.square === poss.square);
+                    });
+
+                // If there are impinging discrepencies, go to next posibility.
+                if (discrepenciesSharingRowColSquare.length) {
+                  return;
+                }
+
+                // If we get here, we have satisfied the theorem with our set of
+                // possibilities and chosen numbers. Add all the other numbers
+                // to
+                // our 'to-exclude' list at this site.
+                numbersNotChosen.forEach(function(numberToExclude) {
+                  results.push({
+                    number : numberToExclude,
+                    row : poss.row,
+                    col : poss.col,
+                  });
+                });
+              });
+        }
+      }
+
+      return results;
     }
 
     /**
@@ -393,18 +497,62 @@ sudoku.solver = function() {
     }
 
     /**
+     * Given 2 exclusion matrices (both 9x9), performs an OR operation where
+     * each cell is 1 if either inputs are 1.
+     */
+    function _exclusion_OR_exclusion(a, b) {
+      var result = _getEmptyGrid(9, 9);
+      for (var i = 0; i < 9; i++) {
+        for (var j = 0; j < 9; j++) {
+          // cast to boolean just to be safe.
+          var aCell = a[i][j] > 0 ? true : false;
+          var bCell = b[i][j] > 0 ? true : false;
+          result[i][j] = (aCell || bCell);
+        }
+      }
+
+      return result;
+    }
+
+    /**
+     * Given 2 exclusion matrices (both 9x9), performs an exclusive-or operation
+     * where each cell is 1 if both inputs match and 0 if they don't.
+     */
+    function _exclusion_XOR_exclusion(a, b) {
+      var result = _getEmptyGrid(9, 9);
+      for (var i = 0; i < 9; i++) {
+        for (var j = 0; j < 9; j++) {
+          // cast to boolean just to be safe.
+          var aCell = a[i][j] > 0 ? true : false;
+          var bCell = b[i][j] > 0 ? true : false;
+          result[i][j] = ((aCell && !bCell) || (!aCell && bCell));
+        }
+      }
+
+      return result;
+    }
+
+    /**
      * Generates an empty exclusion matrix. Dimensions are [D x M x N] where D
      * is the digit, M is the row and N is the column.
      */
     function _getEmptyExclusionMatrix() {
       var result = [];
       for (var i = 0; i < 9; i++) {
+        result.push(_getEmptyGrid(9, 9));
+      }
+      return result;
+    }
+
+    /**
+     * Generates an empty grid (M x N).
+     */
+    function _getEmptyGrid(M, N) {
+      var result = [];
+      for (let i = 0; i < M; i++) {
         result.push([]);
-        for (var j = 0; j < 9; j++) {
-          result[i].push([]);
-          for (var k = 0; k < 9; k++) {
-            result[i][j].push(0);
-          }
+        for (let j = 0; j < N; j++) {
+          result[i].push(0);
         }
       }
       return result;
@@ -412,7 +560,7 @@ sudoku.solver = function() {
 
     /**
      * Gets the occurrances of a value in an MxM matrix. All occurrances are
-     * returned as an array of hashes where each occurrance has Row, Col and
+     * returned as an array of hashes where each occurrance has row, col and
      * Square. The Square convention follows the convention discussed at the
      * top.
      */
