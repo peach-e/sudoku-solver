@@ -23,3 +23,17 @@ document.getElementById(BUTTON_ADVANCE_STEP_ID).addEventListener('click',
     sudoku.program.next);
 document.getElementById(BUTTON_SOLVE_ALL_ID).addEventListener('click',
     sudoku.program.solveAll);
+
+sudoku.grid.drawer.drawGrid('debug', 'debug-wrapper');
+
+function debugRowCol(row, col) {
+  sudoku.grid.manipulation.setCellColor('debug', row, col, '#77FF77');
+}
+
+function debugClear() {
+  for (var i = 0; i < 9; i++) {
+    for (var j = 0; j < 9; j++) {
+      sudoku.grid.manipulation.setCellColor('debug', i, j, '#ffffff');
+    }
+  }
+}

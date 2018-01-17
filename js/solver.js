@@ -69,6 +69,9 @@ sudoku.solver = function() {
      * Advances to the next stage of solution.
      */
     solver.next = function() {
+      // Make sure we didn't make a mistake
+      _validate();
+
       var changeBit = 0;
 
       // Iterators we keep using.
@@ -281,7 +284,7 @@ sudoku.solver = function() {
       // Iterate over 2 choices up to 8.
       var candidateNumbers = [ 1, 2, 3, 4, 5, 6, 7, 8, 9 ];
       var combinations = [];
-      for (let r = 2; r < 3; r++) {
+      for (let r = 2; r < 8; r++) {
 
         // If we have already discovered an exclusion zone from this exercise,
         // exit the loop and solve the puzzle with more traditional means.
@@ -338,34 +341,44 @@ sudoku.solver = function() {
           var discrepencyAreas = _getOccurrancesInMatrix(discrepencyResult,
               true);
 
+          discrepencyAreas.forEach(function(e) {
+            debugRowCol(e.row, e.col);
+
+          });
+
           // Now check each possibility and determine if the numbersNotChosen
           // can be excluded.
-          chosenPossibilities
-              .forEach(function(poss) {
-                // Possibility must not coincide with a discrepency, or share a
-                // row, column and square with one.
-                var discrepenciesSharingRowColSquare = discrepencyAreas
-                    .filter(function(disc) {
-                      return (disc.row === poss.row && disc.col === poss.col && disc.square === poss.square);
-                    });
+          chosenPossibilities.forEach(function(poss) {
+            // Possibility must not coincide with a discrepency, or share
+            // all of row, column, square blocked off.
+            var rowConflicts = 0;
+            var columnConflicts = 0;
+            var squareConflicts = 0;
+            for (var iDis = 0; iDis < discrepencyAreas.length; iDis++) {
+              disc = discrepencyAreas[iDis];
 
-                // If there are impinging discrepencies, go to next posibility.
-                if (discrepenciesSharingRowColSquare.length) {
-                  return;
-                }
+              rowConflicts += (disc.row == poss.row) ? 1 : 0;
+              columnConflicts += (disc.col == poss.col) ? 1 : 0;
+              squareConflicts += (disc.square == poss.square) ? 1 : 0;
+            }
 
-                // If we get here, we have satisfied the theorem with our set of
-                // possibilities and chosen numbers. Add all the other numbers
-                // to
-                // our 'to-exclude' list at this site.
-                numbersNotChosen.forEach(function(numberToExclude) {
-                  results.push({
-                    number : numberToExclude,
-                    row : poss.row,
-                    col : poss.col,
-                  });
-                });
+            // If all three conflicts appear, this possibility is indeterminate
+            // and no assumptions can be made.
+            if (rowConflicts && columnConflicts && squareConflicts) {
+              return;
+            }
+
+            // If we get here, we have satisfied the theorem with our set of
+            // possibilities and chosen numbers. Add all the other numbers
+            // to our 'to-exclude' list at this site.
+            numbersNotChosen.forEach(function(numberToExclude) {
+              results.push({
+                number : numberToExclude,
+                row : poss.row,
+                col : poss.col,
               });
+            });
+          });
         }
       }
 
