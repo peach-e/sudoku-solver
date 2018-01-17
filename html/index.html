@@ -1,0 +1,56 @@
+<!--
+ **********************************************************************
+ *  File   : index.html
+ *  Author : peach
+ *  Date   : 13 January 2018
+ *
+ *  This file is licensed under the GNU General Public License v3.0
+ *  Copyright (C) 2018  Eric Peach
+ **********************************************************************
+-->
+
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>Sudoku Solver</title>
+<link rel="stylesheet" type="text/css" href="../css/main.css" />
+</head>
+
+<body>
+    <h1>Sudoku Solver</h1>
+    <!-- Data Input Mode -->
+    <div id="initialization-dashboard">
+    <p>Please type in the values for your Sudoku puzzle, then click "Begin".</p>
+        <input id="user-input-submit" type="button" value="Begin">
+        <br/><br/>
+        <div id="user-input-wrapper"></div>
+    </div>
+    <!-- Solve Mode -->
+    <div id="solver-dashboard">
+        <input type="button" id="return-to-input" value="Back to Data Input"> <input
+            type="button" value="Next Step" id="advance-step"> <input id="solve-all" type="button" value="Solve All"> <b>Instructions: </b> Click
+        'Next' or 'Solve' to step through the solutions.<br />
+        <div class="Solve View">
+            <div class="solverView" id="view-total-wrapper">Total View</div>
+            <div class="solverView" id="view-1-wrapper">Elimination for #1</div>
+            <div class="solverView" id="view-2-wrapper">Elimination for #2</div>
+            <div class="solverView" id="view-3-wrapper">Elimination for #3</div>
+            <div class="solverView" id="view-4-wrapper">Elimination for #4</div>
+            <div class="solverView" id="view-5-wrapper">Elimination for #5</div>
+            <div class="solverView" id="view-6-wrapper">Elimination for #6</div>
+            <div class="solverView" id="view-7-wrapper">Elimination for #7</div>
+            <div class="solverView" id="view-8-wrapper">Elimination for #8</div>
+            <div class="solverView" id="view-9-wrapper">Elimination for #9</div>
+        </div>
+    </div>
+</body>
+
+<script src="../js/grid/constants.js"></script>
+<script src="../js/grid/drawer.js"></script>
+<script src="../js/grid/manipulation.js"></script>
+<script src="../js/UserGrid.js"></script>
+<script src="../js/solver.js"></script>
+<script src="../js/program.js"></script>
+<script src="../js/main.js"></script>
+</html>

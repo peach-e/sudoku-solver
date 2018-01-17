@@ -1,0 +1,47 @@
+/*
+ **********************************************************************
+ *  File   : main.css
+ *  Author : peach
+ *  Date   : 13 January 2018
+ *
+ *  This file is licensed under the GNU General Public License v3.0
+ *  Copyright (C) 2018  Eric Peach
+ **********************************************************************
+ */
+.solverView {
+  text-align: center;
+  font-weight: bold;
+  float: left;
+  padding: 1em 1em 0em 0em;
+}
+
+.sudokuGrid {
+  background-color: #fafafa;
+  border-collapse: collapse;
+}
+
+.sudokuGrid td {
+  font-weight: normal;
+  font-size: 1.2em;
+  width: 8mm;
+  height: 8mm;
+  border-left: 1px solid black;
+  border-top: 1px solid black;
+  text-align: center;
+}
+
+.sudokuGrid .leftSquareBoundary {
+  border-left: 2px solid blue;
+}
+
+.sudokuGrid .rightSquareBoundary {
+  border-right: 2px solid blue;
+}
+
+.sudokuGrid .topSquareBoundary {
+  border-top: 2px solid blue;
+}
+
+.sudokuGrid .bottomSquareBoundary {
+  border-bottom: 2px solid blue;
+}
