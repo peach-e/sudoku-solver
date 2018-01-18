@@ -121,6 +121,7 @@ sudoku.CrossNumberExclusion = function() {
 
         for (var iPoss = 0; iPoss < possibilities.length; iPoss++) {
           var excludeArray;
+          var newNumbersToExclude = 0;
           var possibility = possibilities[iPoss];
           var row = possibility.row;
           var col = possibility.col;
@@ -138,10 +139,19 @@ sudoku.CrossNumberExclusion = function() {
           var possibilitiesOnRow = _filterOnKey(possibilities, 'row', row);
           var discrepenciesOnRow = _filterOnKey(discrepencies, 'row', row);
 
-          if (possibilitiesOnRow.length === r && discrepenciesOnRow === 0) {
+          if (possibilitiesOnRow.length === r
+              && discrepenciesOnRow.length === 0) {
+            // Get our numbers to exclude.
             excludeArray = _getExcludeObjectArray(numbersNotChosen,
                 possibilitiesOnRow);
-            return excludeArray;
+
+            // Only return if the numbers to exclude aren't already excluded
+            // there.
+            newNumbersToExclude = _doesExcludeArrayHaveNewData(excludeArray,
+                exclusionMatrix);
+            if (newNumbersToExclude) {
+              return excludeArray;
+            }
           }
 
           /**
@@ -150,10 +160,15 @@ sudoku.CrossNumberExclusion = function() {
           var possibilitiesOnCol = _filterOnKey(possibilities, 'col', col);
           var discrepenciesOnCol = _filterOnKey(discrepencies, 'col', col);
 
-          if (possibilitiesOnCol.length === r && discrepenciesOnCol === 0) {
+          if (possibilitiesOnCol.length === r
+              && discrepenciesOnCol.length === 0) {
             excludeArray = _getExcludeObjectArray(numbersNotChosen,
                 possibilitiesOnCol);
-            return excludeArray;
+            newNumbersToExclude = _doesExcludeArrayHaveNewData(excludeArray,
+                exclusionMatrix);
+            if (newNumbersToExclude) {
+              return excludeArray;
+            }
           }
 
           /**
@@ -164,10 +179,15 @@ sudoku.CrossNumberExclusion = function() {
           var discrepenciesOnSquare = _filterOnKey(discrepencies, 'square',
               square);
 
-          if (possibilitiesOnSquare.length === r && discrepenciesOnSquare === 0) {
+          if (possibilitiesOnSquare.length === r
+              && discrepenciesOnSquare.length === 0) {
             excludeArray = _getExcludeObjectArray(numbersNotChosen,
                 possibilitiesOnSquare);
-            return excludeArray;
+            newNumbersToExclude = _doesExcludeArrayHaveNewData(excludeArray,
+                exclusionMatrix);
+            if (newNumbersToExclude) {
+              return excludeArray;
+            }
           }
 
           /*
@@ -185,6 +205,21 @@ sudoku.CrossNumberExclusion = function() {
   /*
    * Private Methods
    */
+
+  function _doesExcludeArrayHaveNewData(excludeArray, exclusionMatrix) {
+    var result = 0;
+    for (var i = 0; i < excludeArray.length; i++) {
+      var row = excludeArray[i].row;
+      var col = excludeArray[i].col;
+      var number = excludeArray[i].number;
+
+      if (!exclusionMatrix[number - 1][row][col]) {
+        result = 1;
+        break;
+      }
+    }
+    return result;
+  }
 
   /**
    * TODO: Should be matrix method.
@@ -317,7 +352,7 @@ sudoku.CrossNumberExclusion = function() {
   function _getExcludeObjectArray(numbers, possibilities) {
     var result = [];
     possibilities.forEach(function(poss) {
-      numbers.foreach(function(num) {
+      numbers.forEach(function(num) {
         var obj = {
           number : num,
           row : poss.row,
