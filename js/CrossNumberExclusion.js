@@ -40,21 +40,12 @@ sudoku.CrossNumberExclusion = function() {
    * Public Methods
    */
 
-  function combineExclusionMatrices() {
-    var results = [];
+  function combineExclusionMatrices(exclusionMatrix) {
 
     // Iterate over 2 choices up to 8.
     var candidateNumbers = [ 1, 2, 3, 4, 5, 6, 7, 8, 9 ];
     var combinations = [];
     for (let r = 2; r < 8; r++) {
-
-      /*
-       * If we have already discovered an exclusion zone from this exercise,
-       * exit the loop and solve the puzzle with more traditional means.
-       */
-      if (results.length) {
-        return results;
-      }
 
       /*
        * Get all possible combinations of choosing r numbers from 1 to 9.
@@ -98,8 +89,8 @@ sudoku.CrossNumberExclusion = function() {
         for ( var iAlternate in alternateNumbers) {
           alternateNumber = alternateNumbers[iAlternate];
 
-          var a = _exclusionMatrix[chosenNumber - 1];
-          var b = _exclusionMatrix[alternateNumber - 1];
+          var a = exclusionMatrix[chosenNumber - 1];
+          var b = exclusionMatrix[alternateNumber - 1];
 
           var discrepencyAB = _exclusion_XOR_exclusion(a, b);
           discrepencyMatrix = _exclusion_OR_exclusion(discrepencyAB,
@@ -113,7 +104,7 @@ sudoku.CrossNumberExclusion = function() {
         // ..(2) the number of possibilities along that row, column or square
         // ......equals our number of chosen numbers (r), then
         // it should be safe to exclude all numbersNotChosen from those spots.
-        var chosenNumberExclusionMatrix = _exclusionMatrix[chosenNumber - 1];
+        var chosenNumberExclusionMatrix = exclusionMatrix[chosenNumber - 1];
         var chosenNumberPossibilityMatrix = _invertExclusionMatrix(chosenNumberExclusionMatrix);
 
         /*
@@ -129,59 +120,66 @@ sudoku.CrossNumberExclusion = function() {
          */
 
         for (var iPoss = 0; iPoss < possibilities.length; iPoss++) {
+          var excludeArray;
           var possibility = possibilities[iPoss];
           var row = possibility.row;
           var col = possibility.col;
           var square = possibility.square;
 
-          /*
+          /**
+           * -------------------- EXCLUSION BY ROW --------------------
+           * 
            * Determine if we can exclude this spot on the basis that there are
-           * viable spots along the same row.
+           * as many viable spots along the same ROW as there are numbers. If it
+           * turns out we can, map each of the numbersNotChosen to each
+           * possibility and return that object as the result of this whole
+           * operation.
            */
-          var excludableAongRow = _isDirectionExcludable(possibilities,
-              discrepencies, 'row', row);
+          var possibilitiesOnRow = _filterOnKey(possibilities, 'row', row);
+          var discrepenciesOnRow = _filterOnKey(discrepencies, 'row', row);
 
-        }
-        var excludableAlongRow = _getExcludablePossibilities(possibilities,
-            discrepencies, 'row');
-
-        // Now check each possibility and determine if the numbersNotChosen
-        // can be excluded.
-        chosenPossibilities.forEach(function(poss) {
-          // Possibility must not coincide with a discrepency, or share
-          // all of row, column, square blocked off.
-          var rowConflicts = 0;
-          var columnConflicts = 0;
-          var squareConflicts = 0;
-          for (var iDis = 0; iDis < discrepencyAreas.length; iDis++) {
-            disc = discrepencyAreas[iDis];
-
-            rowConflicts += (disc.row == poss.row) ? 1 : 0;
-            columnConflicts += (disc.col == poss.col) ? 1 : 0;
-            squareConflicts += (disc.square == poss.square) ? 1 : 0;
+          if (possibilitiesOnRow.length === r && discrepenciesOnRow === 0) {
+            excludeArray = _getExcludeObjectArray(numbersNotChosen,
+                possibilitiesOnRow);
+            return excludeArray;
           }
 
-          // If all three conflicts appear, this possibility is indeterminate
-          // and no assumptions can be made.
-          if (rowConflicts && columnConflicts && squareConflicts) {
-            return;
+          /**
+           * -------------------- EXCLUSION BY COL --------------------
+           */
+          var possibilitiesOnCol = _filterOnKey(possibilities, 'col', col);
+          var discrepenciesOnCol = _filterOnKey(discrepencies, 'col', col);
+
+          if (possibilitiesOnCol.length === r && discrepenciesOnCol === 0) {
+            excludeArray = _getExcludeObjectArray(numbersNotChosen,
+                possibilitiesOnCol);
+            return excludeArray;
           }
 
-          // If we get here, we have satisfied the theorem with our set of
-          // possibilities and chosen numbers. Add all the other numbers
-          // to our 'to-exclude' list at this site.
-          numbersNotChosen.forEach(function(numberToExclude) {
-            results.push({
-              number : numberToExclude,
-              row : poss.row,
-              col : poss.col,
-            });
-          });
-        });
+          /**
+           * -------------------- EXCLUSION BY SQUARE --------------------
+           */
+          var possibilitiesOnSquare = _filterOnKey(possibilities, 'square',
+              square);
+          var discrepenciesOnSquare = _filterOnKey(discrepencies, 'square',
+              square);
+
+          if (possibilitiesOnSquare.length === r && discrepenciesOnSquare === 0) {
+            excludeArray = _getExcludeObjectArray(numbersNotChosen,
+                possibilitiesOnSquare);
+            return excludeArray;
+          }
+
+          /*
+           * If we get down here, try a different possibility, then a different
+           * combination of numbers, then a different number of numbers.
+           */
+        }// End iterating on the first number's possibilities
       }// End iterating on combinations of r numbers.
     }// End iterating on r
 
-    return results;
+    // If we get here, this operation did not find anything. Return empty array.
+    return [];
   }
 
   /*
@@ -189,13 +187,64 @@ sudoku.CrossNumberExclusion = function() {
    */
 
   /**
+   * TODO: Should be matrix method.
+   * 
+   * Given 2 exclusion matrices (both 9x9), performs an OR operation where each
+   * cell is 1 if either inputs are 1.
+   */
+  function _exclusion_OR_exclusion(a, b) {
+    var result = _getEmptyGrid(9, 9);
+    for (var i = 0; i < 9; i++) {
+      for (var j = 0; j < 9; j++) {
+        // cast to boolean just to be safe.
+        var aCell = a[i][j] > 0 ? true : false;
+        var bCell = b[i][j] > 0 ? true : false;
+        result[i][j] = (aCell || bCell);
+      }
+    }
+
+    return result;
+  }
+
+  /**
+   * TODO: Refactor into Matrix class. Gets the square for the specified row and
+   * column.
+   */
+  function _getSquareForRowColumn(row, col) {
+    var rGroup = Math.floor(row / 3);
+    var cGroup = Math.floor(col / 3);
+    var result = rGroup * 3 + cGroup;
+    return result;
+  }
+
+  /**
+   * TODO: Should be matrix method.
+   * 
+   * Given 2 exclusion matrices (both 9x9), performs an exclusive-or operation
+   * where each cell is 1 if both inputs match and 0 if they don't.
+   */
+  function _exclusion_XOR_exclusion(a, b) {
+    var result = _getEmptyGrid(9, 9);
+    for (var i = 0; i < 9; i++) {
+      for (var j = 0; j < 9; j++) {
+        // cast to boolean just to be safe.
+        var aCell = a[i][j] > 0 ? true : false;
+        var bCell = b[i][j] > 0 ? true : false;
+        result[i][j] = ((aCell && !bCell) || (!aCell && bCell));
+      }
+    }
+
+    return result;
+  }
+
+  /**
    * Iterates over the array (arr) of objects. Counts how many of the objects
    * contain the value 'val' at key 'key'.
    */
-  function _countAlongKey(arr, key, val) {
+  function _filterOnKey(arr, key, val) {
     return arr.filter(function(a) {
       return (a[key] == val);
-    }).length;
+    });
   }
 
   /**
@@ -244,6 +293,43 @@ sudoku.CrossNumberExclusion = function() {
   }
 
   /**
+   * TODO: Should be MxM, and should specify default value as matrix
+   * constructor.
+   * 
+   * Generates an empty grid (M x N).
+   */
+  function _getEmptyGrid(M, N) {
+    var result = [];
+    for (let i = 0; i < M; i++) {
+      result.push([]);
+      for (let j = 0; j < N; j++) {
+        result[i].push(0);
+      }
+    }
+    return result;
+  }
+
+  /**
+   * Given a list of possibilities and a list of numbers, this function maps
+   * each number to each position and returns a list of objects with keys
+   * (number, row, col).
+   */
+  function _getExcludeObjectArray(numbers, possibilities) {
+    var result = [];
+    possibilities.forEach(function(poss) {
+      numbers.foreach(function(num) {
+        var obj = {
+          number : num,
+          row : poss.row,
+          col : poss.col
+        };
+        result.push(obj);
+      });
+    });
+    return result;
+  }
+
+  /**
    * TODO: Refactor this into the matrix object when the time comes. Gets the
    * occurrances of a value in an MxM matrix. All occurrances are returned as an
    * array of hashes where each occurrance has row, col and Square. The Square
@@ -268,32 +354,17 @@ sudoku.CrossNumberExclusion = function() {
   }
 
   /**
-   * Given a list of possibilities and a list of discrepencies, determine
-   * whether there are possibilities that exist along the specified direction
-   * (row, column, square), at the specified coordinate, where there are also no
-   * discrepencies.
+   * TODO: Should be a matrix operation.
    * 
-   * Returns true if the given direction can be excluded
+   * Inverts an exclusionMatrix matrix ([M x N])
    */
-  function _isDirectionExcludable(possibilities, discrepencies, direction) {
-    var result = [];
-
-    possibilities.forEach(function(poss) {
-      var nPossibilities = 0;
-      var nDiscrepencies = 0;
-
-      // Look along row.
-      nPossibilities = countAlongKey(possibilities, 'row', poss.row);
-      nDiscrepencies = countAlongKey(discrepencies, 'row', poss.row);
-
-      // If number of possibilities equals number of number with zero
-      // issues,
-      //
-      if (nPossibilities === r && nDiscrepencies === 0) {
-
-      }
-
+  function _invertExclusionMatrix(matrix) {
+    var result = matrix.map(function(row) {
+      return row.map(function(cell) {
+        return cell ? 0 : 1;
+      });
     });
+    return result;
   }
 
   return {

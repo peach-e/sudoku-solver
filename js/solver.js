@@ -295,6 +295,8 @@ sudoku.solver = function() {
     // **********************************
 
     /**
+     * TODO: Cloning should be matrix method.
+     * 
      * clones the solution matrix so we don't tweak the input data and people
      * don't tweak our output data.
      */
@@ -445,42 +447,8 @@ sudoku.solver = function() {
     }
 
     /**
-     * Given 2 exclusion matrices (both 9x9), performs an OR operation where
-     * each cell is 1 if either inputs are 1.
-     */
-    function _exclusion_OR_exclusion(a, b) {
-      var result = _getEmptyGrid(9, 9);
-      for (var i = 0; i < 9; i++) {
-        for (var j = 0; j < 9; j++) {
-          // cast to boolean just to be safe.
-          var aCell = a[i][j] > 0 ? true : false;
-          var bCell = b[i][j] > 0 ? true : false;
-          result[i][j] = (aCell || bCell);
-        }
-      }
-
-      return result;
-    }
-
-    /**
-     * Given 2 exclusion matrices (both 9x9), performs an exclusive-or operation
-     * where each cell is 1 if both inputs match and 0 if they don't.
-     */
-    function _exclusion_XOR_exclusion(a, b) {
-      var result = _getEmptyGrid(9, 9);
-      for (var i = 0; i < 9; i++) {
-        for (var j = 0; j < 9; j++) {
-          // cast to boolean just to be safe.
-          var aCell = a[i][j] > 0 ? true : false;
-          var bCell = b[i][j] > 0 ? true : false;
-          result[i][j] = ((aCell && !bCell) || (!aCell && bCell));
-        }
-      }
-
-      return result;
-    }
-
-    /**
+     * TODO: This should use the matrix constructor when it is written.
+     * 
      * Generates an empty exclusion matrix. Dimensions are [D x M x N] where D
      * is the digit, M is the row and N is the column.
      */
@@ -493,6 +461,9 @@ sudoku.solver = function() {
     }
 
     /**
+     * TODO: Should be MxM, and should specify default value as matrix
+     * constructor.
+     * 
      * Generates an empty grid (M x N).
      */
     function _getEmptyGrid(M, N) {
@@ -507,10 +478,12 @@ sudoku.solver = function() {
     }
 
     /**
-     * TODO: Refactor this into the matrix object when the time comes. Gets the
-     * occurrances of a value in an MxM matrix. All occurrances are returned as
-     * an array of hashes where each occurrance has row, col and Square. The
-     * Square convention follows the convention discussed at the top.
+     * TODO: Refactor this into the matrix object when the time comes.
+     * 
+     * Gets the occurrances of a value in an MxM matrix. All occurrances are
+     * returned as an array of hashes where each occurrance has row, col and
+     * Square. The Square convention follows the convention discussed at the
+     * top.
      */
     function _getOccurrancesInMatrix(matrix, soughtValue) {
       var occurrances = [];
@@ -567,8 +540,9 @@ sudoku.solver = function() {
       return [ minRow, maxRow, minCol, maxCol ];
     }
 
-    /*
-     * Gets the square for the specified row and column.
+    /**
+     * TODO: Refactor into Matrix class. Gets the square for the specified row
+     * and column.
      */
     function _getSquareForRowColumn(row, col) {
       var rGroup = Math.floor(row / 3);
@@ -614,6 +588,8 @@ sudoku.solver = function() {
     }
 
     /**
+     * TODO: Should be a matrix operation.
+     * 
      * Inverts an exclusionMatrix matrix ([M x N])
      */
     function _invertExclusionMatrix(matrix) {
@@ -626,8 +602,8 @@ sudoku.solver = function() {
     }
 
     /**
-     * Strict Uniqueness for a number requires it to be the only one of its
-     * value in the same row, column AND square.
+     * TODO: Refactor into Matrix Class. Strict Uniqueness for a number requires
+     * it to be the only one of its value in the same row, column AND square.
      */
     function _isStrictlyUnique(matrix, number, row, col) {
       var occurrancesOfNumber = _getOccurrancesInMatrix(matrix, number);
