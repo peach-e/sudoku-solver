@@ -11,14 +11,7 @@
 
 // MATRIX CONVENTIONS
 // -------------------------
-// All matrices are assumed to be 9 x 9, organized by [Row, Col]. The
-// exclusion matrix also has a zeroth dimension NUMBER, which ranges from
-// 0 to 8 to contain exclusion matrices for 1 - 9.
-//
-// For example, to find whether number 4 is excluded from the top-center row
-// and column, you would search
-//
-// _exclusionMatrix[3][0][4].
+// All matrices are assumed to be 9 x 9, organized by [Row, Col].
 //
 // Sometimes squares are directly referenced. Squares are addressed according to
 // the convention:
@@ -43,10 +36,43 @@ sudoku.solver = function() {
     /*
      * Private Attributes
      */
+
+    // CHANGE BIT
+    // ------------------------
+    // As the big 'next()' function operates, we want to keep track of any
+    // new discoveries (exclusions or solutions) we make during that cycle.
+    //
+    // The last step in 'next()' is an operation which must only be called
+    // when we know that there was absolutely nothing else to do.
+    //
+    // The change bit detects if we've discovered anything new since the
+    // start of the iteration. This bit is set anytime a new number is
+    // solved or excluded, and the function should consistently check the
+    // state of the change bit and exit if it gets set.
+    //
+    var _changeBit = 0;
+
+    // SOLUTION MATRIX
+    // -----------------------
+    // The solution matrix is a 9x9 grid that contains either null values or
+    // the numbers that are known to be part of the solution. During
+    // construction, it gets initialized with the inputData, and as numbers
+    // are solved, it gets filled in.
+    //
     var _solutionMatrix = _cloneSolutionMatrix(inputData);
 
+    // EXCLUSION MATRIX
+    // -----------------------
+    // The exclusion matrix also has a zeroth dimension NUMBER, which ranges
+    // from 0 to 8 to contain exclusion matrices for 1 - 9. For example, to find
+    // whether number 4 is excluded from the top-center row and column, you
+    // would search
+    //
+    // _exclusionMatrix[3][0][4].
+    //
     // Exclusion matrix is [number][row][col], and each value is 0 if not
     // excluded and 1 if excluded.
+    //
     var _exclusionMatrix = _getEmptyExclusionMatrix();
     var _excludeNumberCallback = excludeNumberCallback
         || _defaultExcludeNumberCallback;
@@ -72,7 +98,8 @@ sudoku.solver = function() {
       // Make sure we didn't make a mistake
       _validate();
 
-      var changeBit = 0;
+      // Clear the change bit.
+      _changeBit = 0;
 
       // Iterators we keep using.
       var iRow = 0;
@@ -94,8 +121,7 @@ sudoku.solver = function() {
           }
         }
         _solutionInProgress = 1;
-        changeBit = 1;
-        return changeBit;
+        return _changeBit;
       }
 
       // For each number, look for solutions.
@@ -140,8 +166,10 @@ sudoku.solver = function() {
           var isSolution = isUniqueInRow || isUniqueInCol || isUniqueInSquare;
           if (isSolution) {
             _solveNumber(numberToSolve, row, col);
-            changeBit = 1;
-            return changeBit;
+          }
+
+          if (_changeBit) {
+            return true;
           }
 
           // Check 2
@@ -178,6 +206,10 @@ sudoku.solver = function() {
             _excludeSquare(numberToSolve, row, col, possibilitiesInRowAndSquare);
           }
 
+          if (_changeBit) {
+            return true;
+          }
+
           // Check 3
           // ------------------------
           // Identical to Check 2 but checks column instead of row.
@@ -200,6 +232,10 @@ sudoku.solver = function() {
           if (isUniqueInCol) {
             _excludeSquare(numberToSolve, row, col, possibilitiesInColAndSquare);
           }
+
+          if (_changeBit) {
+            return true;
+          }
         }// End Iterating through possibilities for a single number.
 
         // Check 4
@@ -218,8 +254,10 @@ sudoku.solver = function() {
           var row = eliminationSurvivors[0].row;
           var col = eliminationSurvivors[0].col;
           _solveNumber(numberToSolve, row, col);
-          changeBit = 1;
-          return changeBit;
+        }
+
+        if (_changeBit) {
+          return true;
         }
       }// End iterating through numbers.
 
@@ -229,15 +267,26 @@ sudoku.solver = function() {
       // break out the set theory to expose a few more exclusions. This is
       // computationally expensive but only necessary once or twice on hard
       // puzzles.
+      //
+      // This technique (cross-number exclusion) is very powerful but can ruin
+      // the puzzle if you use it when it's not strictly necessary. That's why
+      // we keep checking the change bit!
 
       // ExclusionResults is an array of objects where each object has 'number',
       // 'row' and 'col'.
       var exclusionResults = _combineExclusionMatrices();
-      exclusionResults.forEach(function(e) {
-        _excludeCell(e.number, e.row, e.col);
-        changeBit = 1;
-      });
-      return changeBit;
+
+      if (exclusionResults.length) {
+        exclusionResults.forEach(function(e) {
+          _excludeCell(e.number, e.row, e.col);
+        });
+      }
+
+      if (_changeBit) {
+        return true;
+      } else {
+        return false;
+      }
     }
 
     // **********************************
@@ -407,6 +456,14 @@ sudoku.solver = function() {
      * number and cell.
      */
     function _excludeCell(number, row, col) {
+
+      // Check to see if the cell was already excluded.
+      var isAlreadyExcluded = _exclusionMatrix[number - 1][row][col];
+      if (isAlreadyExcluded) {
+        return;
+      }
+
+      _changeBit = 1;
       _exclusionMatrix[number - 1][row][col] = 1;
       _excludeNumberCallback(number, row, col);
     }

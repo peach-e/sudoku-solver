@@ -15,6 +15,7 @@ var BUTTON_SOLVE_ALL_ID = 'solve-all';
 
 sudoku.program.setup();
 
+// Button Event Listeners
 document.getElementById(BUTTON_BEGIN_ID).addEventListener('click',
     sudoku.program.enterSolveMode);
 document.getElementById(BUTTON_RETURN_ID).addEventListener('click',
@@ -23,6 +24,10 @@ document.getElementById(BUTTON_ADVANCE_STEP_ID).addEventListener('click',
     sudoku.program.next);
 document.getElementById(BUTTON_SOLVE_ALL_ID).addEventListener('click',
     sudoku.program.solveAll);
+
+// Keyboard event listener to advance to next cell on data input.
+
+
 
 sudoku.grid.drawer.drawGrid('debug', 'debug-wrapper');
 

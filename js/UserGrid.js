@@ -78,6 +78,21 @@ sudoku.UserGrid = function() {
     }
     return result;
   }
+
+  function setInputValues(gridId, numberArray) {
+    var grid = _getGrid(gridId);
+    if (!grid) {
+      return;
+    }
+
+    // For each row and column, write values.
+    for (var i = 0; i < 9; i++) {
+      for (var j = 0; j < 9; j++) {
+        sudoku.grid.manipulation.writeTextBox(gridId, i, j, numberArray[i][j]);
+      }
+    }
+  }
+
   function removeGrid(gridId) {
     var grid = _getGrid(gridId);
     if (!grid) {
@@ -105,6 +120,16 @@ sudoku.UserGrid = function() {
      *          {string} the ID of grid to read info from.
      */
     getInputValues : getInputValues,
+
+    /**
+     * Writes a 9x9 array into the textbox grid.
+     * 
+     * @param gridId
+     *          The ID of the grid to write to.
+     * @param numberArray
+     *          The array of numbers to populate.
+     */
+    setInputValues : setInputValues,
 
     /**
      * Removes a grid with the specified gridId.

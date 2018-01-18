@@ -137,19 +137,23 @@ sudoku.program = function() {
     if (!document.getElementById(_userInputGridId)) {
       sudoku.UserGrid.drawGrid(_userInputGridId, _userInputWrapperId);
     }
+
+    // Populate the grid with saved values if we can.
+    var savedArrayJSON = window.localStorage.getItem('savedArrayJSON');
+    if (savedArrayJSON) {
+      var savedArray = JSON.parse(savedArrayJSON);
+      sudoku.UserGrid.setInputValues(_userInputGridId, savedArray);
+    }
   }
 
   function enterSolveMode() {
     // Get the data.
     var userInputData = sudoku.UserGrid.getInputValues(_userInputGridId);
 
-    // #############
-    // ############# MOCKED DATA!
-    // #############
-    userInputData = _mockout_data();
+    // Override with mocked data.
+    // userInputData = _mockout_data();
 
     // Attempt to create the solver with the data.
-
     try {
       _solver = sudoku.solver.create(userInputData, _excludeNumber,
           _solveNumber);
@@ -161,6 +165,11 @@ sudoku.program = function() {
     }
 
     // If the solver was created successfully, switch to mode 2
+
+    // Save the input data to storage.
+    var userInputDataJSON = JSON.stringify(userInputData);
+    window.localStorage.setItem('savedArrayJSON', userInputDataJSON);
+
     // Hide the data input area.
     document.getElementById(_initializationFormId).style.display = "none";
     document.getElementById(_solverDashboardId).style.display = '';
@@ -232,15 +241,3 @@ sudoku.program = function() {
     solveAll : solveAll,
   };
 }();
-
-function _mockout_data() {
-  return [ [ 6, null, null, 9, 5, null, 3, null, null, ],
-      [ null, 1, null, null, null, 4, null, null, null, ],
-      [ 4, null, null, null, null, null, 1, null, null, ],
-      [ null, 3, 4, null, null, 6, null, 1, null, ],
-      [ 2, null, null, null, null, null, null, null, 5, ],
-      [ null, 6, null, 4, null, null, 7, 8, null, ],
-      [ null, null, 2, null, null, null, null, null, 8, ],
-      [ null, null, null, 2, null, null, null, 7, null, ],
-      [ null, null, 9, null, 6, 3, null, null, 1, ], ];
-}

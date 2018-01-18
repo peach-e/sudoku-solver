@@ -107,13 +107,29 @@ sudoku.grid.manipulation = function() {
       return;
     }
 
-    return cell.childNodes[0].value
+    return cell.childNodes[0].value;
+  }
+
+  function writeTextBox(gridId, row, col, message) {
+    var grid = _getGrid(gridId);
+    var cell = _getCell(grid, row, col);
+
+    if (!grid || !cell) {
+      return;
+    }
+
+    if (!cell.hasChildNodes() || cell.childNodes[0].tagName != 'INPUT') {
+      console.warn('Cell does not have a text box.');
+      return;
+    }
+
+    cell.childNodes[0].value = message;
   }
 
   return {
     /**
      * Determine color of cell.
-     *
+     * 
      * @param gridId
      *          The ID for the grid to operate on.
      * @param row
@@ -127,7 +143,7 @@ sudoku.grid.manipulation = function() {
     /**
      * Assigns color of cell. Color should be literal ("red") or hex
      * ("#FF0000").
-     *
+     * 
      * @param gridId
      *          The ID for the grid to operate on.
      * @param row
@@ -141,7 +157,7 @@ sudoku.grid.manipulation = function() {
 
     /**
      * Retrieves value of cell.
-     *
+     * 
      * @param gridId
      *          The ID for the grid to operate on.
      * @param row
@@ -154,7 +170,7 @@ sudoku.grid.manipulation = function() {
 
     /**
      * Sets value of cell.
-     *
+     * 
      * @param gridId
      *          The ID for the grid to operate on.
      * @param row
@@ -166,7 +182,7 @@ sudoku.grid.manipulation = function() {
 
     /**
      * When user input is required, adds a text box.
-     *
+     * 
      * @param gridId
      *          The ID for the grid to operate on.
      * @param row
@@ -178,7 +194,7 @@ sudoku.grid.manipulation = function() {
 
     /**
      * Reads value of text box.
-     *
+     * 
      * @param gridId
      *          The ID for the grid to operate on.
      * @param row
@@ -188,6 +204,20 @@ sudoku.grid.manipulation = function() {
      * @return result {integer} A single digit
      */
     readTextBox : readTextBox,
+
+    /**
+     * Writes to the value of a text box in a grid.
+     * 
+     * @param gridId
+     *          The ID for the grid to operate on.
+     * @param row
+     *          The specified Row
+     * @param col
+     *          The Specified Column.
+     * @param message
+     *          The message to write to the box.
+     */
+    writeTextBox : writeTextBox,
   };
 
 }();
