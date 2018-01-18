@@ -10,12 +10,12 @@ Simple application written in HTML and JavaScript to watch a Sudoku puzzle solve
 ## Development
 * Development is done with Eclipse 4.7.2 with "HTML Editor (WTP)".
 * Indentation is 2 spaces for CSS/JS files and 4 spaces for HTML files.
-
-The file `program.js` has a spot commented out where you can hard-code a puzzle so you don't have to re-type the puzzle each time you refresh the browser during development.
+* Use ECMA2015, because Eclipse can't figure out how to format ES6.
 
 ### TODOs:
-* Add the tricky bitmask checking algorithm.
-* Streamline the UI for data entry and retrieval.
+* Streamline the UI for data entry and retrieval, move buttons around.
+* Refactor all the matrix operations into one file.
+* Investigate an adjustment to the cross-number exclusion theorem, I think there's edge cases I'm forgetting.
 
 ## Algorithm
 TODO: Paraphrase the comments in solver.js to describe the algorithm.

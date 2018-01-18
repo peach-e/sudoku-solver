@@ -21,17 +21,22 @@
     <h1>Sudoku Solver</h1>
     <!-- Data Input Mode -->
     <div id="initialization-dashboard">
-    <p>Please type in the values for your Sudoku puzzle, then click "Begin".</p>
-        <input id="user-input-submit" type="button" value="Begin">
-        <input id="user-input-clear" type="button" value="Clear Inputs">
-        <br/><br/>
+        <p>
+            <b>Instructions:</b> Please type in the values for your Sudoku puzzle, then click
+            "Begin".
+        </p>
+        <input id="user-input-submit" type="button" value="Begin"> <input
+            id="user-input-clear" type="button" value="Clear Inputs"> <br /> <br />
         <div id="user-input-wrapper"></div>
     </div>
     <!-- Solve Mode -->
     <div id="solver-dashboard">
+        <p>
+            <b>Instructions: </b> Click 'Next' or 'Solve' to step through the solutions.
+        </p>
         <input type="button" id="return-to-input" value="Back to Data Input"> <input
-            type="button" value="Next Step" id="advance-step"> <input id="solve-all" type="button" value="Solve All"> <b>Instructions: </b> Click
-        'Next' or 'Solve' to step through the solutions.<br />
+            type="button" value="Next Step" id="advance-step"> <input id="solve-all"
+            type="button" value="Solve All">
         <div class="Solve View">
             <div class="solverView" id="view-total-wrapper">Total View</div>
             <div class="solverView" id="view-1-wrapper">Elimination for #1</div>

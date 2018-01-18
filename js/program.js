@@ -126,8 +126,10 @@ sudoku.program = function() {
    * Public Methods
    */
   function clearInputs() {
-    window.localStorage.removeItem(_localStorageToken);
-    sudoku.UserGrid.clearInputValues(_userInputGridId);
+    if (confirm('You sure you want to clear the inputs?')) {
+      window.localStorage.removeItem(_localStorageToken);
+      sudoku.UserGrid.clearInputValues(_userInputGridId);
+    }
   }
 
   function enterDataInputMode() {
