@@ -50,6 +50,20 @@ sudoku.UserGrid = function() {
     }
   }
 
+  function clearInputValues(gridId) {
+    var grid = _getGrid(gridId);
+    if (!grid) {
+      return;
+    }
+
+    // For each row and column, write values.
+    for (var i = 0; i < 9; i++) {
+      for (var j = 0; j < 9; j++) {
+        sudoku.grid.manipulation.writeTextBox(gridId, i, j, '');
+      }
+    }
+  }
+
   function getInputValues(gridId) {
     var grid = _getGrid(gridId);
     if (!grid) {
@@ -103,6 +117,14 @@ sudoku.UserGrid = function() {
   }
 
   return {
+    /**
+     * Clears the 9x9 textbox grid.
+     * 
+     * @param gridId
+     *          The ID of the grid to write to.
+     */
+    clearInputValues : clearInputValues,
+
     /**
      * Draws a styled Sudoku Grid inside the specified DIV element.
      * 

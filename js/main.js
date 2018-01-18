@@ -9,6 +9,7 @@
  **********************************************************************
  */
 var BUTTON_BEGIN_ID = 'user-input-submit';
+var BUTTON_CLEAR_ID = 'user-input-clear';
 var BUTTON_RETURN_ID = 'return-to-input';
 var BUTTON_ADVANCE_STEP_ID = 'advance-step';
 var BUTTON_SOLVE_ALL_ID = 'solve-all';
@@ -24,6 +25,8 @@ document.getElementById(BUTTON_ADVANCE_STEP_ID).addEventListener('click',
     sudoku.program.next);
 document.getElementById(BUTTON_SOLVE_ALL_ID).addEventListener('click',
     sudoku.program.solveAll);
+document.getElementById(BUTTON_CLEAR_ID).addEventListener('click',
+    sudoku.program.clearInputs);
 
 // Keyboard event listener to advance to next cell on data input.
 

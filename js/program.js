@@ -12,6 +12,9 @@
 var sudoku = sudoku || {};
 sudoku.program = function() {
 
+  // LocalStorage Token
+  var _localStorageToken = 'savedArrayJSON';
+
   // Element IDs.
   var _initializationFormId = 'initialization-dashboard';
   var _solverDashboardId = 'solver-dashboard';
@@ -122,6 +125,11 @@ sudoku.program = function() {
   /*
    * Public Methods
    */
+  function clearInputs() {
+    window.localStorage.removeItem(_localStorageToken);
+    sudoku.UserGrid.clearInputValues(_userInputGridId);
+  }
+
   function enterDataInputMode() {
 
     // Disable the solver
@@ -139,7 +147,7 @@ sudoku.program = function() {
     }
 
     // Populate the grid with saved values if we can.
-    var savedArrayJSON = window.localStorage.getItem('savedArrayJSON');
+    var savedArrayJSON = window.localStorage.getItem(_localStorageToken);
     if (savedArrayJSON) {
       var savedArray = JSON.parse(savedArrayJSON);
       sudoku.UserGrid.setInputValues(_userInputGridId, savedArray);
@@ -168,7 +176,7 @@ sudoku.program = function() {
 
     // Save the input data to storage.
     var userInputDataJSON = JSON.stringify(userInputData);
-    window.localStorage.setItem('savedArrayJSON', userInputDataJSON);
+    window.localStorage.setItem(_localStorageToken, userInputDataJSON);
 
     // Hide the data input area.
     document.getElementById(_initializationFormId).style.display = "none";
@@ -210,6 +218,10 @@ sudoku.program = function() {
   }
 
   return {
+    /**
+     * Expunges localStorage of the cached sudoku puzzle and clears the screen.
+     */
+    clearInputs : clearInputs,
     /**
      * Allows user to enter data for a sudoku puzzle.
      */
