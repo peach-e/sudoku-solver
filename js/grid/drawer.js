@@ -53,24 +53,20 @@ sudoku.implementation.grid.drawer = function() {
         case 0:
         case 3:
         case 6:
-          cell.classList
-              .add(sudoku.implementation.grid.constants.CLASS_TOP_SQUARE_BOUNDARY);
+          cell.classList.add(sudoku.implementation.grid.constants.CLASS_TOP_SQUARE_BOUNDARY);
           break;
         case 8:
-          cell.classList
-              .add(sudoku.implementation.grid.constants.CLASS_BOTTOM_SQUARE_BOUNDARY);
+          cell.classList.add(sudoku.implementation.grid.constants.CLASS_BOTTOM_SQUARE_BOUNDARY);
         }
         // Apply the left/right cell boundary as applicable.
         switch (j) {
         case 0:
         case 3:
         case 6:
-          cell.classList
-              .add(sudoku.implementation.grid.constants.CLASS_LEFT_SQUARE_BOUNDARY);
+          cell.classList.add(sudoku.implementation.grid.constants.CLASS_LEFT_SQUARE_BOUNDARY);
           break;
         case 8:
-          cell.classList
-              .add(sudoku.implementation.grid.constants.CLASS_RIGHT_SQUARE_BOUNDARY);
+          cell.classList.add(sudoku.implementation.grid.constants.CLASS_RIGHT_SQUARE_BOUNDARY);
         }
 
         row.appendChild(cell);
@@ -83,14 +79,6 @@ sudoku.implementation.grid.drawer = function() {
   }
 
   return {
-    /**
-     * Draws a styled Sudoku Grid inside the specified DIV element.
-     * 
-     * @param gridId
-     *          {string} the ID to give the new grid.
-     * @param wrappingDivElementId
-     *          {node} The ID of the wrapping DIV element to place the grid.
-     */
     drawGrid : drawGrid
   };
 

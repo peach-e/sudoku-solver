@@ -20,9 +20,7 @@ sudoku.implementation.grid.manipulation = function() {
 
   function _getGrid(gridId) {
     var grid = document.getElementById(gridId);
-    if (!grid
-        || !grid.classList
-            .contains(sudoku.implementation.grid.constants.CLASS_SUDOKUGRID)) {
+    if (!grid || !grid.classList.contains(sudoku.implementation.grid.constants.CLASS_SUDOKUGRID)) {
       console.error('No valid grid by name "' + gridId + '"');
       return;
     }
@@ -129,96 +127,12 @@ sudoku.implementation.grid.manipulation = function() {
   }
 
   return {
-    /**
-     * Determine color of cell.
-     * 
-     * @param gridId
-     *          The ID for the grid to operate on.
-     * @param row
-     *          The specified Row
-     * @param col
-     *          The Specified Column.
-     * @return {string} result CSS color value.
-     */
     getCellColor : getCellColor,
-
-    /**
-     * Assigns color of cell. Color should be literal ("red") or hex
-     * ("#FF0000").
-     * 
-     * @param gridId
-     *          The ID for the grid to operate on.
-     * @param row
-     *          The specified Row
-     * @param col
-     *          The Specified Column.
-     * @param color
-     *          CSS Hex Value or string.
-     */
     setCellColor : setCellColor,
-
-    /**
-     * Retrieves value of cell.
-     * 
-     * @param gridId
-     *          The ID for the grid to operate on.
-     * @param row
-     *          The specified Row
-     * @param col
-     *          The Specified Column.
-     * @return result A single digit
-     */
     getCellValue : getCellValue,
-
-    /**
-     * Sets value of cell.
-     * 
-     * @param gridId
-     *          The ID for the grid to operate on.
-     * @param row
-     *          The specified Row
-     * @param col
-     *          The Specified Column.
-     */
     setCellValue : setCellValue,
-
-    /**
-     * When user input is required, adds a text box.
-     * 
-     * @param gridId
-     *          The ID for the grid to operate on.
-     * @param row
-     *          The specified Row
-     * @param col
-     *          The Specified Column.
-     */
     createTextBox : createTextBox,
-
-    /**
-     * Reads value of text box.
-     * 
-     * @param gridId
-     *          The ID for the grid to operate on.
-     * @param row
-     *          The specified Row
-     * @param col
-     *          The Specified Column.
-     * @return result {integer} A single digit
-     */
     readTextBox : readTextBox,
-
-    /**
-     * Writes to the value of a text box in a grid.
-     * 
-     * @param gridId
-     *          The ID for the grid to operate on.
-     * @param row
-     *          The specified Row
-     * @param col
-     *          The Specified Column.
-     * @param message
-     *          The message to write to the box.
-     */
     writeTextBox : writeTextBox,
   };
 

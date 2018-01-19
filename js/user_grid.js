@@ -10,8 +10,9 @@
  */
 
 var sudoku = sudoku || {};
-sudoku.grid = sudoku.grid || {};
-sudoku.UserGrid = function() {
+sudoku.implementation = sudoku.implementation || {};
+sudoku.implementation.grid = sudoku.implementation.grid || {};
+sudoku.implementation.grid.userGrid = function() {
 
   /*
    * Private Functions
@@ -19,9 +20,7 @@ sudoku.UserGrid = function() {
 
   function _getGrid(gridId) {
     var grid = document.getElementById(gridId);
-    if (!grid
-        || !grid.classList
-            .contains(sudoku.implementation.grid.constants.CLASS_SUDOKUGRID)) {
+    if (!grid || !grid.classList.contains(sudoku.implementation.grid.constants.CLASS_SUDOKUGRID)) {
       console.error('No valid grid by name "' + gridId + '"');
       return;
     }
@@ -77,8 +76,7 @@ sudoku.UserGrid = function() {
       result.push([]);
       for (var j = 0; j < 9; j++) {
         // Get the value
-        var value = sudoku.implementation.grid.manipulation.readTextBox(gridId,
-            i, j);
+        var value = sudoku.implementation.grid.manipulation.readTextBox(gridId, i, j);
 
         // Make sure we're doing it right.
         if (value === null) {
@@ -104,8 +102,7 @@ sudoku.UserGrid = function() {
     // For each row and column, write values.
     for (var i = 0; i < 9; i++) {
       for (var j = 0; j < 9; j++) {
-        sudoku.implementation.grid.manipulation.writeTextBox(gridId, i, j,
-            numberArray[i][j]);
+        sudoku.implementation.grid.manipulation.writeTextBox(gridId, i, j, numberArray[i][j]);
       }
     }
   }
@@ -120,49 +117,10 @@ sudoku.UserGrid = function() {
   }
 
   return {
-    /**
-     * Clears the 9x9 textbox grid.
-     * 
-     * @param gridId
-     *          The ID of the grid to write to.
-     */
     clearInputGridValues : clearInputGridValues,
-
-    /**
-     * Draws a Sudoku Grid inside the specified DIV element with text fields
-     * where numbers can be written.
-     * 
-     * @param gridId
-     *          {string} the ID to give the new grid.wrappingDivElementId
-     * @param wrappingDivElementId
-     *          {node} The ID of the wrapping DIV element to place the grid.
-     */
     drawInputGrid : drawInputGrid,
-
-    /**
-     * Reads a textbox grid into an array.
-     * 
-     * @param gridId
-     *          {string} the ID of grid to read info from.
-     */
     getInputGridValues : getInputGridValues,
-
-    /**
-     * Writes a 9x9 array into the textbox grid.
-     * 
-     * @param gridId
-     *          The ID of the grid to write to.
-     * @param numberArray
-     *          The array of numbers to populate.
-     */
     setInputGridValues : setInputGridValues,
-
-    /**
-     * Removes a grid with the specified gridId.
-     * 
-     * @param gridId
-     *          {string} the ID of grid to get rid of.
-     */
     removeGrid : removeGrid,
   }
 

@@ -128,7 +128,7 @@ sudoku.program = function() {
   function clearInputs() {
     if (confirm('You sure you want to clear the inputs?')) {
       window.localStorage.removeItem(_localStorageToken);
-      sudoku.UserGrid.clearInputGridValues(_userInputGridId);
+      sudoku.implementation.grid.userGrid.clearInputGridValues(_userInputGridId);
     }
   }
 
@@ -145,20 +145,20 @@ sudoku.program = function() {
     // If the user input grid still exists, keep it. Otherwise,
     // Draw a new one.
     if (!document.getElementById(_userInputGridId)) {
-      sudoku.UserGrid.drawInputGrid(_userInputGridId, _userInputWrapperId);
+      sudoku.implementation.grid.userGrid.drawInputGrid(_userInputGridId, _userInputWrapperId);
     }
 
     // Populate the grid with saved values if we can.
     var savedArrayJSON = window.localStorage.getItem(_localStorageToken);
     if (savedArrayJSON) {
       var savedArray = JSON.parse(savedArrayJSON);
-      sudoku.UserGrid.setInputGridValues(_userInputGridId, savedArray);
+      sudoku.implementation.grid.userGrid.setInputGridValues(_userInputGridId, savedArray);
     }
   }
 
   function enterSolveMode() {
     // Get the data.
-    var userInputData = sudoku.UserGrid.getInputGridValues(_userInputGridId);
+    var userInputData = sudoku.implementation.grid.userGrid.getInputGridValues(_userInputGridId);
 
     // Override with mocked data.
     // userInputData = _mockout_data();
