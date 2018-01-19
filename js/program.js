@@ -59,14 +59,14 @@ sudoku.program = function() {
    */
   function _drawSolutionGrids() {
     // Draw the Total View Grid.
-    sudoku.grid.drawer.drawGrid(gridIds.VIEW_TOTAL, wrapperIds.VIEW_TOTAL);
+    sudoku.implementation.grid.drawer.drawGrid(gridIds.VIEW_TOTAL, wrapperIds.VIEW_TOTAL);
 
     // Draw the rest of 'em.
     for (var i = 1; i <= 9; i++) {
       var viewKey = "VIEW_" + i;
       var gridId = gridIds[viewKey];
       var wrapperId = wrapperIds[viewKey];
-      sudoku.grid.drawer.drawGrid(gridId, wrapperId);
+      sudoku.implementation.grid.drawer.drawGrid(gridId, wrapperId);
     }
   }
 
@@ -76,7 +76,7 @@ sudoku.program = function() {
    */
   function _excludeNumber(number, row, col) {
     var gridId = gridIds["VIEW_" + number];
-    sudoku.grid.manipulation.setCellColor(gridId, row, col, '#FF7777');
+    sudoku.implementation.grid.manipulation.setCellColor(gridId, row, col, '#FF7777');
   }
 
   /**
@@ -119,7 +119,7 @@ sudoku.program = function() {
    */
   function _solveNumber(number, row, col) {
     var gridId = gridIds.VIEW_TOTAL;
-    sudoku.grid.manipulation.setCellValue(gridId, row, col, number);
+    sudoku.implementation.grid.manipulation.setCellValue(gridId, row, col, number);
   }
 
   /*
@@ -165,7 +165,7 @@ sudoku.program = function() {
 
     // Attempt to create the solver with the data.
     try {
-      _solver = sudoku.solver.create(userInputData, _excludeNumber,
+      _solver = sudoku.implementation.solver.algorithm.create(userInputData, _excludeNumber,
           _solveNumber);
     } catch (e) {
       // On fail, show alert and cancel the mode switch.

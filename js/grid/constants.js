@@ -10,8 +10,9 @@
  */
 
 var sudoku = sudoku || {};
-sudoku.grid = sudoku.grid || {};
-sudoku.grid.constants = {
+sudoku.implementation = sudoku.implementation || {};
+sudoku.implementation.grid = sudoku.implementation.grid || {};
+sudoku.implementation.grid.constants = {
   CLASS_SUDOKUGRID : 'sudokuGrid',
   CLASS_LEFT_SQUARE_BOUNDARY : 'leftSquareBoundary',
   CLASS_RIGHT_SQUARE_BOUNDARY : 'rightSquareBoundary',

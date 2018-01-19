@@ -10,8 +10,9 @@
  */
 
 var sudoku = sudoku || {};
-sudoku.grid = sudoku.grid || {};
-sudoku.grid.manipulation = function() {
+sudoku.implementation = sudoku.implementation || {};
+sudoku.implementation.grid = sudoku.implementation.grid || {};
+sudoku.implementation.grid.manipulation = function() {
 
   /*
    * Private Methods
@@ -20,7 +21,8 @@ sudoku.grid.manipulation = function() {
   function _getGrid(gridId) {
     var grid = document.getElementById(gridId);
     if (!grid
-        || !grid.classList.contains(sudoku.grid.constants.CLASS_SUDOKUGRID)) {
+        || !grid.classList
+            .contains(sudoku.implementation.grid.constants.CLASS_SUDOKUGRID)) {
       console.error('No valid grid by name "' + gridId + '"');
       return;
     }

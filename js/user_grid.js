@@ -1,6 +1,6 @@
 /*
  **********************************************************************
- *  File   : UserGrid.js
+ *  File   : user_grid.js
  *  Author : peach
  *  Date   : 13 January 2018
  *
@@ -20,7 +20,7 @@ sudoku.UserGrid = function() {
   function _getGrid(gridId) {
     var grid = document.getElementById(gridId);
     if (!grid
-        || !grid.classList.contains(sudoku.grid.constants.CLASS_SUDOKUGRID)) {
+        || !grid.classList.contains(sudoku.implementation.grid.constants.CLASS_SUDOKUGRID)) {
       console.error('No valid grid by name "' + gridId + '"');
       return;
     }
@@ -34,7 +34,7 @@ sudoku.UserGrid = function() {
   function drawGrid(gridId, wrappingDivElementId) {
 
     // Draw the grid,
-    sudoku.grid.drawer.drawGrid(gridId, wrappingDivElementId);
+    sudoku.implementation.grid.drawer.drawGrid(gridId, wrappingDivElementId);
 
     // Return if it didnt work.
     var grid = _getGrid(gridId);
@@ -45,7 +45,7 @@ sudoku.UserGrid = function() {
     // For each row
     for (var i = 0; i < 9; i++) {
       for (var j = 0; j < 9; j++) {
-        sudoku.grid.manipulation.createTextBox(gridId, i, j);
+        sudoku.implementation.grid.manipulation.createTextBox(gridId, i, j);
       }
     }
   }
@@ -59,7 +59,7 @@ sudoku.UserGrid = function() {
     // For each row and column, write values.
     for (var i = 0; i < 9; i++) {
       for (var j = 0; j < 9; j++) {
-        sudoku.grid.manipulation.writeTextBox(gridId, i, j, '');
+        sudoku.implementation.grid.manipulation.writeTextBox(gridId, i, j, '');
       }
     }
   }
@@ -76,7 +76,7 @@ sudoku.UserGrid = function() {
       result.push([]);
       for (var j = 0; j < 9; j++) {
         // Get the value
-        var value = sudoku.grid.manipulation.readTextBox(gridId, i, j);
+        var value = sudoku.implementation.grid.manipulation.readTextBox(gridId, i, j);
 
         // Make sure we're doing it right.
         if (value === null) {
@@ -102,7 +102,7 @@ sudoku.UserGrid = function() {
     // For each row and column, write values.
     for (var i = 0; i < 9; i++) {
       for (var j = 0; j < 9; j++) {
-        sudoku.grid.manipulation.writeTextBox(gridId, i, j, numberArray[i][j]);
+        sudoku.implementation.grid.manipulation.writeTextBox(gridId, i, j, numberArray[i][j]);
       }
     }
   }

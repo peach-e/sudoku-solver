@@ -1,6 +1,6 @@
 /*
  **********************************************************************
- *  File   : CrossNumberExclusion.js
+ *  File   : cross_number_exclusion.js
  *  Author : peach
  *  Date   : 15 January 2018
  *
@@ -34,7 +34,9 @@
 // already).
 //
 var sudoku = sudoku || {};
-sudoku.CrossNumberExclusion = function() {
+sudoku.implementation = sudoku.implementation || {};
+sudoku.implementation.solver = sudoku.implementation.solver || {};
+sudoku.implementation.solver.crossNumberExclusion = function() {
 
   /*
    * Public Methods

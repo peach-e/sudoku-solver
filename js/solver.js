@@ -28,7 +28,9 @@
 //
 var esp = {};
 var sudoku = sudoku || {};
-sudoku.solver = function() {
+sudoku.implementation = sudoku.implementation || {};
+sudoku.implementation.solver = sudoku.implementation.solver || {};
+sudoku.implementation.solver.algorithm = function() {
   function create(inputData, excludeNumberCallback, solveNumberCallback) {
 
     var solver = {};
@@ -274,7 +276,7 @@ sudoku.solver = function() {
 
       // ExclusionResults is an array of objects where each object has 'number',
       // 'row' and 'col'.
-      var exclusionResults = sudoku.CrossNumberExclusion
+      var exclusionResults = sudoku.implementation.solver.crossNumberExclusion
           .combineExclusionMatrices(_exclusionMatrix);
 
       if (exclusionResults.length) {
