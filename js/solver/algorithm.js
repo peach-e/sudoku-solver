@@ -84,6 +84,7 @@ sudoku.implementation.solver.algorithm = function() {
       // Clear the change bit.
       _changeBit = 0;
 
+      // TODO: These shouldn't be necessary anymore.
       // Iterators we keep using.
       var iRow = 0;
       var iCol = 0;
@@ -92,17 +93,14 @@ sudoku.implementation.solver.algorithm = function() {
       // Exclude all initial numbers in the solution matrix if we're next'ing
       // for the first time.
       if (!_solutionInProgress) {
-        for (iRow = 0; iRow < 9; iRow++) {
-          for (iCol = 0; iCol < 9; iCol++) {
-            var value = _solutionMatrix[iRow][iCol];
 
-            // Filter out the null values.
-            if (!value) {
-              continue;
-            }
-            _excludeNewNumber(value, iRow, iCol);
+        _solutionMatrix.iterateOverRowAndColumn(function(row, col, sq, value) {
+          // watch out for null values.
+          if (value) {
+            _excludeNewNumber(value, row, col);
           }
-        }
+        });
+
         _solutionInProgress = 1;
         return _changeBit;
       }
@@ -112,9 +110,8 @@ sudoku.implementation.solver.algorithm = function() {
 
         // Get the possibilities (the compliments of the exclusion matrix at the
         // present number). Sort them into array of hashes for easy processing.
-
-        possibilityMatrix = _invertExclusionMatrix(_exclusionMatrix[numberToSolve - 1]);
-        var possibilities = _getOccurrancesInMatrix(possibilityMatrix, true);
+        var possibilityMatrix = _exclusionMatrix[numberToSolve - 1].booleanCompliment();
+        var possibilities = possibilityMatrix.getOccurrancesOfValue(1);
 
         /*
          * Go through each possibility and look for reasons to accept it or
@@ -227,7 +224,7 @@ sudoku.implementation.solver.algorithm = function() {
         var inverseEliminationResult = _inverseEliminate(numberToSolve);
 
         // If there are numbers found, then we assign them to the spot!
-        var eliminationSurvivors = _getOccurrancesInMatrix(inverseEliminationResult, 1);
+        var eliminationSurvivors = inverseEliminationResult.getOccurrancesOfValue(1);
         if (eliminationSurvivors.length) {
           var row = eliminationSurvivors[0].row;
           var col = eliminationSurvivors[0].col;
@@ -316,13 +313,13 @@ sudoku.implementation.solver.algorithm = function() {
     function _excludeCell(number, row, col) {
 
       // Check to see if the cell was already excluded.
-      var isAlreadyExcluded = _exclusionMatrix[number - 1][row][col];
+      var isAlreadyExcluded = _exclusionMatrix[number - 1].get(row, col);
       if (isAlreadyExcluded) {
         return;
       }
 
       _changeBit = 1;
-      _exclusionMatrix[number - 1][row][col] = 1;
+      _exclusionMatrix[number - 1].set(row, col, 1);
       _excludeNumberCallback(number, row, col);
     }
 
@@ -433,7 +430,7 @@ sudoku.implementation.solver.algorithm = function() {
     function _getEmptyExclusionMatrix() {
       var result = [];
       for (var i = 0; i < 9; i++) {
-        result.push(_getEmptyGrid(9, 9));
+        result.push(new sudoku.math.Matrix(0));
       }
       return result;
     }
@@ -537,31 +534,35 @@ sudoku.implementation.solver.algorithm = function() {
      * excluded The present number.
      */
     function _inverseEliminate(numberToSolve) {
-      var result = [];
-      for (var row = 0; row < 9; row++) {
-        result.push([]);
-        for (var col = 0; col < 9; col++) {
-          var excludedByAll = 1;
-          for (var number = 1; number <= 9; number++) {
-            // Whether or not this row/col is excluded by this number.
-            var excludedByNumber = _exclusionMatrix[number - 1][row][col];
+      var result = new sudoku.math.Matrix(0);
+      result.iterateOverRowAndColumn(function(row, col, square, value) {
+        // For the given spot, assume it's excluded by all other numbers until
+        // we see that its explicitely NOT excluded by one of them.
+        var excludedByAll = 1;
+        for (var number = 1; number <= 9; number++) {
 
-            // If we're on the current number, we must pointedly NOT be excluded
-            // at this site.
-            // Otherwise, we expect an exclusion.
-            if (number === numberToSolve) {
-              excludedByAll = excludedByAll && !excludedByNumber;
-            } else {
-              excludedByAll = excludedByAll && excludedByNumber;
-            }
+          // Whether or not this row/col is excluded by this number.
+          var excludedByNumber = _exclusionMatrix[number - 1].get(row, col);
 
-            if (!excludedByAll) {
-              break;
-            }
+          if (number === numberToSolve) {
+            // If current number is the number to solve, this cell can only
+            // continue to be excluded by all others if the current number is
+            // NOT excluding it.
+            excludedByAll = excludedByAll && !excludedByNumber;
+          } else {
+            // In general, the cell continues to be excluded by all others if
+            // the current number also excludes it.
+            excludedByAll = excludedByAll && excludedByNumber;
           }
-          result[row][col] = excludedByAll ? 1 : 0;
-        }
-      }
+
+          if (!excludedByAll) {
+            break;
+          }
+        }// end iterating through numbers.
+
+        result.set(row, col, excludedByAll);
+      });
+
       return result;
     }
 
@@ -611,7 +612,7 @@ sudoku.implementation.solver.algorithm = function() {
      */
     function _solveNumber(number, row, col) {
       // Update the solution matrix.
-      _solutionMatrix[row][col] = number;
+      _solutionMatrix.set(row, col, number);
 
       // Update the exclusion matrix.
       _excludeNewNumber(number, row, col);

@@ -70,10 +70,24 @@ sudoku.implementation.math.Matrix = function(constructorArgument) {
    */
 
   /**
+   * non-zeros go to zero and zeros go to 1.
+   */
+  function booleanCompliment() {
+    var invertedMatrix = new self.constructor(0);
+    iterateOverRowAndColumn(function(row, col, sq, val) {
+      // If our value at this row/col is 0, set the new matrix's val to 1.
+      if (!val) {
+        invertedMatrix.set(row, col, 1);
+      }
+    });
+    return invertedMatrix;
+  }
+
+  /**
    * Clones the matrix.
    */
   function clone() {
-    return new this.constructor(this);
+    return new self.constructor(self);
   }
 
   /**
@@ -162,6 +176,13 @@ sudoku.implementation.math.Matrix = function(constructorArgument) {
     }
   }
 
+  /**
+   * Writes a value to the data block.
+   */
+  function set(row, col, value) {
+    _data[row][col] = value;
+  }
+
   /*
    * Private Methods
    */
@@ -231,6 +252,12 @@ sudoku.implementation.math.Matrix = function(constructorArgument) {
   // ==================================================
 
   /**
+   * Returns a matrix that is the boolean compliment of this one. All non-zero
+   * values are mapped to 0, and zero-values are mapped to 1.
+   */
+  self.booleanCompliment = booleanCompliment;
+
+  /**
    * Creates a duplicate of the current matrix.
    */
   self.clone = clone;
@@ -289,6 +316,18 @@ sudoku.implementation.math.Matrix = function(constructorArgument) {
    *          callback to call on each row (passing 'row'), if specified.
    */
   self.iterateOverRowAndColumn = iterateOverRowAndColumn;
+
+  /**
+   * Sets a value to the given row and column.
+   * 
+   * @param row
+   *          the row to write to.
+   * @param col
+   *          the column to write to.
+   * @param value
+   *          the value to write to that spot.
+   */
+  self.set = set;
 
   self.data = _data;
 };
