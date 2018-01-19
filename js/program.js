@@ -84,7 +84,7 @@ sudoku.program = function() {
    */
   function _initializeSolutionGrid() {
 
-    var vals = _solver.getMatrixValues();
+    var vals = _solver.getSolutionMatrix();
 
     for (var row = 0; row < 9; row++) {
       for (var col = 0; col < 9; col++) {
@@ -165,7 +165,7 @@ sudoku.program = function() {
 
     // Attempt to create the solver with the data.
     try {
-      _solver = sudoku.implementation.solver.algorithm.create(userInputData, _excludeNumber,
+      _solver = sudoku.solver.create(userInputData, _excludeNumber,
           _solveNumber);
     } catch (e) {
       // On fail, show alert and cancel the mode switch.

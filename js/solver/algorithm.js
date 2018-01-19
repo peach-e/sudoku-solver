@@ -1,6 +1,6 @@
 /*
  **********************************************************************
- *  File   : solver.js
+ *  File   : algorithm.js
  *  Author : peach
  *  Date   : 13 January 2018
  *
@@ -76,10 +76,8 @@ sudoku.implementation.solver.algorithm = function() {
     // excluded and 1 if excluded.
     //
     var _exclusionMatrix = _getEmptyExclusionMatrix();
-    var _excludeNumberCallback = excludeNumberCallback
-        || _defaultExcludeNumberCallback;
-    var _solveNumberCallback = solveNumberCallback
-        || _defaultSolveNumberCallback;
+    var _excludeNumberCallback = excludeNumberCallback || _defaultExcludeNumberCallback;
+    var _solveNumberCallback = solveNumberCallback || _defaultSolveNumberCallback;
     var _solutionInProgress = 0;
 
     // **********************************
@@ -87,9 +85,9 @@ sudoku.implementation.solver.algorithm = function() {
     // **********************************
 
     /**
-     * Returns the current matrix of solved values.
+     * Returns a clone of the current matrix of solved values.
      */
-    solver.getMatrixValues = function() {
+    solver.getSolutionMatrix = function() {
       return _cloneSolutionMatrix(_solutionMatrix);
     }
 
@@ -183,8 +181,7 @@ sudoku.implementation.solver.algorithm = function() {
           // ...and they are the only options on the row (unique on row),
           // ......exclude the rest of the square.
           // Note: Check 3 does the same thing for column & square.
-          var possibilitiesInRowAndSquare = possibilitiesInRow.filter(function(
-              p) {
+          var possibilitiesInRowAndSquare = possibilitiesInRow.filter(function(p) {
             return p.square == square;
           });
 
@@ -197,8 +194,7 @@ sudoku.implementation.solver.algorithm = function() {
           // exclude all the other spots on the row cause the 7 can't be there."
           if (isUniqueInSquare) {
             // Exclude the rest of the row.
-            _excludeRowOrColumn(1, numberToSolve, row,
-                possibilitiesInRowAndSquare);
+            _excludeRowOrColumn(1, numberToSolve, row, possibilitiesInRowAndSquare);
           }
 
           // Unique in row if Number of (Row U Square) == (Row).
@@ -215,16 +211,14 @@ sudoku.implementation.solver.algorithm = function() {
           // Check 3
           // ------------------------
           // Identical to Check 2 but checks column instead of row.
-          var possibilitiesInColAndSquare = possibilitiesInCol.filter(function(
-              p) {
+          var possibilitiesInColAndSquare = possibilitiesInCol.filter(function(p) {
             return p.square == square;
           });
 
           // Unique in square if N(Col U Square) == N(Square).
           isUniqueInSquare = (possibilitiesInColAndSquare.length == possibilitiesInSquare.length);
           if (isUniqueInSquare) {
-            _excludeRowOrColumn(0, numberToSolve, col,
-                possibilitiesInColAndSquare);
+            _excludeRowOrColumn(0, numberToSolve, col, possibilitiesInColAndSquare);
           }
 
           // Unique in column if N(Col U Square) == N(Col).
@@ -250,8 +244,7 @@ sudoku.implementation.solver.algorithm = function() {
         var inverseEliminationResult = _inverseEliminate(numberToSolve);
 
         // If there are numbers found, then we assign them to the spot!
-        var eliminationSurvivors = _getOccurrancesInMatrix(
-            inverseEliminationResult, 1);
+        var eliminationSurvivors = _getOccurrancesInMatrix(inverseEliminationResult, 1);
         if (eliminationSurvivors.length) {
           var row = eliminationSurvivors[0].row;
           var col = eliminationSurvivors[0].col;
@@ -320,16 +313,16 @@ sudoku.implementation.solver.algorithm = function() {
      * Default method when excluding a number.
      */
     function _defaultExcludeNumberCallback(number, row, column) {
-      console.log('Excluding number "' + number + '" from row "' + row
-          + '" and column "' + column + '".');
+      console.log('Excluding number "' + number + '" from row "' + row + '" and column "' + column
+          + '".');
     }
 
     /**
      * Default method when solving a number.
      */
     function _defaultSolveNumberCallback(number, row, column) {
-      console.log('Resolved Number "' + number + '" at row "' + row
-          + '" and column "' + column + '".');
+      console.log('Resolved Number "' + number + '" at row "' + row + '" and column "' + column
+          + '".');
     }
 
     /**
@@ -654,9 +647,8 @@ sudoku.implementation.solver.algorithm = function() {
           if (number) {
             var isValid = _isStrictlyUnique(_solutionMatrix, number, row, col);
             if (!isValid) {
-              throw "Invalid solution found in Matrix, near number '" + number
-                  + "' in row '" + (row + 1) + "' and column '" + (col + 1)
-                  + "'.";
+              throw "Invalid solution found in Matrix, near number '" + number + "' in row '"
+                  + (row + 1) + "' and column '" + (col + 1) + "'.";
             }
           }
         }
@@ -676,13 +668,6 @@ sudoku.implementation.solver.algorithm = function() {
   }
 
   return {
-    /**
-     * Returns an instance of the Solver class (if successful). Otherwise
-     * returns null. The solver class is constructed with an [MxN] array of
-     * input values that have either sudoku inputs or null.
-     * 
-     * If validation is successful, an object is created and returned.
-     */
     create : create,
   };
 }();
