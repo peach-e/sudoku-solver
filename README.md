@@ -14,7 +14,6 @@ Simple application written in HTML and JavaScript to watch a Sudoku puzzle solve
 
 ### TODOs:
 * Streamline the UI for data entry and retrieval, move buttons around.
-* Refactor all the matrix operations into one file.
 * Investigate an adjustment to the cross-number exclusion theorem, I think there's edge cases I'm forgetting.
 
 ## Algorithm

@@ -9,7 +9,6 @@
  **********************************************************************
  */
 
-var esp = {};
 var sudoku = sudoku || {};
 sudoku.implementation = sudoku.implementation || {};
 sudoku.implementation.solver = sudoku.implementation.solver || {};
@@ -58,7 +57,7 @@ sudoku.implementation.solver.algorithm = function() {
     // Exclusion matrix is [number][row][col], and each value is 0 if not
     // excluded and 1 if excluded.
     //
-    var _exclusionMatrix = _getEmptyExclusionMatrix();
+    var _exclusionMatrix = _createEmptyExclusionMatrix();
     var _excludeNumberCallback = excludeNumberCallback || _defaultExcludeNumberCallback;
     var _solveNumberCallback = solveNumberCallback || _defaultSolveNumberCallback;
     var _solutionInProgress = 0;
@@ -83,11 +82,6 @@ sudoku.implementation.solver.algorithm = function() {
 
       // Clear the change bit.
       _changeBit = 0;
-
-      // TODO: These shouldn't be necessary anymore.
-      // Iterators we keep using.
-      var iRow = 0;
-      var iCol = 0;
 
       // STARTUP -----------------------------------
       // Exclude all initial numbers in the solution matrix if we're next'ing
@@ -270,26 +264,6 @@ sudoku.implementation.solver.algorithm = function() {
     // **********************************
 
     /**
-     * TODO: Cloning should be matrix method.
-     * 
-     * clones the solution matrix so we don't tweak the input data and people
-     * don't tweak our output data.
-     */
-    function _cloneSolutionMatrix(inputMatrix) {
-      var result = [];
-      for (var i = 0; i < 9; i++) {
-        var row = [];
-        for (var j = 0; j < 9; j++) {
-          var value = Number(inputMatrix[i][j]);
-          value = value || null;
-          row.push(value);
-        }
-        result.push(row);
-      }
-      return result;
-    }
-
-    /**
      * Default method when excluding a number.
      */
     function _defaultExcludeNumberCallback(number, row, column) {
@@ -422,60 +396,15 @@ sudoku.implementation.solver.algorithm = function() {
     }
 
     /**
-     * TODO: This should use the matrix constructor when it is written.
-     * 
      * Generates an empty exclusion matrix. Dimensions are [D x M x N] where D
      * is the digit, M is the row and N is the column.
      */
-    function _getEmptyExclusionMatrix() {
+    function _createEmptyExclusionMatrix() {
       var result = [];
       for (var i = 0; i < 9; i++) {
         result.push(new sudoku.math.Matrix(0));
       }
       return result;
-    }
-
-    /**
-     * TODO: Should be MxM, and should specify default value as matrix
-     * constructor.
-     * 
-     * Generates an empty grid (M x N).
-     */
-    function _getEmptyGrid(M, N) {
-      var result = [];
-      for (let i = 0; i < M; i++) {
-        result.push([]);
-        for (let j = 0; j < N; j++) {
-          result[i].push(0);
-        }
-      }
-      return result;
-    }
-
-    /**
-     * TODO: Refactor this into the matrix object when the time comes.
-     * 
-     * Gets the occurrances of a value in an MxM matrix. All occurrances are
-     * returned as an array of hashes where each occurrance has row, col and
-     * Square. The Square convention follows the convention discussed at the
-     * top.
-     */
-    function _getOccurrancesInMatrix(matrix, soughtValue) {
-      var occurrances = [];
-      for (var row = 0; row < 9; row++) {
-        for (var col = 0; col < 9; col++) {
-          var value = matrix[row][col];
-          if (value != soughtValue)
-            continue;
-          var square = _getSquareForRowColumn(row, col);
-          occurrances.push({
-            row : row,
-            col : col,
-            square : square
-          });
-        }
-      }
-      return occurrances;
     }
 
     /*
@@ -513,17 +442,6 @@ sudoku.implementation.solver.algorithm = function() {
       }
 
       return [ minRow, maxRow, minCol, maxCol ];
-    }
-
-    /**
-     * TODO: Refactor into Matrix class. Gets the square for the specified row
-     * and column.
-     */
-    function _getSquareForRowColumn(row, col) {
-      var rGroup = Math.floor(row / 3);
-      var cGroup = Math.floor(col / 3);
-      var result = rGroup * 3 + cGroup;
-      return result;
     }
 
     /**
@@ -567,47 +485,6 @@ sudoku.implementation.solver.algorithm = function() {
     }
 
     /**
-     * TODO: Should be a matrix operation.
-     * 
-     * Inverts an exclusionMatrix matrix ([M x N])
-     */
-    function _invertExclusionMatrix(matrix) {
-      var result = matrix.map(function(row) {
-        return row.map(function(cell) {
-          return cell ? 0 : 1;
-        });
-      });
-      return result;
-    }
-
-    /**
-     * TODO: Refactor into Matrix Class. Strict Uniqueness for a number requires
-     * it to be the only one of its value in the same row, column AND square.
-     */
-    function _isStrictlyUnique(matrix, number, row, col) {
-      var occurrancesOfNumber = _getOccurrancesInMatrix(matrix, number);
-      var square = _getSquareForRowColumn(row, col);
-
-      // Unique in row if number of occurrances in row is 1.
-      var isUniqueInRow = occurrancesOfNumber.filter(function(o) {
-        return o.row == row;
-      }).length === 1;
-
-      // Unique in col if number of occurrances in col is 1.
-      var isUniqueInCol = occurrancesOfNumber.filter(function(o) {
-        return o.col == col;
-      }).length === 1;
-
-      // Unique in square if number of occurrances in square is 1.
-      var isUniqueInSquare = occurrancesOfNumber.filter(function(o) {
-        return o.square == square;
-      }).length === 1;
-
-      var result = isUniqueInRow && isUniqueInCol && isUniqueInSquare;
-      return result;
-    }
-
-    /**
      * When a number has been determined to be in a certain spot, we solve it!
      */
     function _solveNumber(number, row, col) {
@@ -642,13 +519,6 @@ sudoku.implementation.solver.algorithm = function() {
     }
 
     _validate();
-
-    // For Me
-    esp.solver = solver;
-    esp.solutionMatrix = _solutionMatrix;
-    esp.exclusionMatrix = _exclusionMatrix;
-    esp.excludeNumberCallback = _excludeNumberCallback;
-    esp.solveNumberCallback = _solveNumberCallback;
 
     return solver;
   }

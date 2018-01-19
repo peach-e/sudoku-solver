@@ -211,57 +211,6 @@ sudoku.implementation.solver.crossNumberExclusion = function() {
   }
 
   /**
-   * TODO: Should be matrix method.
-   * 
-   * Given 2 exclusion matrices (both 9x9), performs an OR operation where each
-   * cell is 1 if either inputs are 1.
-   */
-  function _exclusion_OR_exclusion(a, b) {
-    var result = _getEmptyGrid(9, 9);
-    for (var i = 0; i < 9; i++) {
-      for (var j = 0; j < 9; j++) {
-        // cast to boolean just to be safe.
-        var aCell = a[i][j] > 0 ? true : false;
-        var bCell = b[i][j] > 0 ? true : false;
-        result[i][j] = (aCell || bCell);
-      }
-    }
-
-    return result;
-  }
-
-  /**
-   * TODO: Refactor into Matrix class. Gets the square for the specified row and
-   * column.
-   */
-  function _getSquareForRowColumn(row, col) {
-    var rGroup = Math.floor(row / 3);
-    var cGroup = Math.floor(col / 3);
-    var result = rGroup * 3 + cGroup;
-    return result;
-  }
-
-  /**
-   * TODO: Should be matrix method.
-   * 
-   * Given 2 exclusion matrices (both 9x9), performs an exclusive-or operation
-   * where each cell is 1 if both inputs match and 0 if they don't.
-   */
-  function _exclusion_XOR_exclusion(a, b) {
-    var result = _getEmptyGrid(9, 9);
-    for (var i = 0; i < 9; i++) {
-      for (var j = 0; j < 9; j++) {
-        // cast to boolean just to be safe.
-        var aCell = a[i][j] > 0 ? true : false;
-        var bCell = b[i][j] > 0 ? true : false;
-        result[i][j] = ((aCell && !bCell) || (!aCell && bCell));
-      }
-    }
-
-    return result;
-  }
-
-  /**
    * Iterates over the array (arr) of objects. Counts how many of the objects
    * contain the value 'val' at key 'key'.
    */
@@ -316,23 +265,6 @@ sudoku.implementation.solver.crossNumberExclusion = function() {
   }
 
   /**
-   * TODO: Should be MxM, and should specify default value as matrix
-   * constructor.
-   * 
-   * Generates an empty grid (M x N).
-   */
-  function _getEmptyGrid(M, N) {
-    var result = [];
-    for (let i = 0; i < M; i++) {
-      result.push([]);
-      for (let j = 0; j < N; j++) {
-        result[i].push(0);
-      }
-    }
-    return result;
-  }
-
-  /**
    * Given a list of possibilities and a list of numbers, this function maps
    * each number to each position and returns a list of objects with keys
    * (number, row, col).
@@ -347,44 +279,6 @@ sudoku.implementation.solver.crossNumberExclusion = function() {
           col : poss.col
         };
         result.push(obj);
-      });
-    });
-    return result;
-  }
-
-  /**
-   * TODO: Refactor this into the matrix object when the time comes. Gets the
-   * occurrances of a value in an MxM matrix. All occurrances are returned as an
-   * array of hashes where each occurrance has row, col and Square. The Square
-   * convention follows the convention discussed at the top.
-   */
-  function _getOccurrancesInMatrix(matrix, soughtValue) {
-    var occurrances = [];
-    for (var row = 0; row < 9; row++) {
-      for (var col = 0; col < 9; col++) {
-        var value = matrix[row][col];
-        if (value != soughtValue)
-          continue;
-        var square = _getSquareForRowColumn(row, col);
-        occurrances.push({
-          row : row,
-          col : col,
-          square : square
-        });
-      }
-    }
-    return occurrances;
-  }
-
-  /**
-   * TODO: Should be a matrix operation.
-   * 
-   * Inverts an exclusionMatrix matrix ([M x N])
-   */
-  function _invertExclusionMatrix(matrix) {
-    var result = matrix.map(function(row) {
-      return row.map(function(cell) {
-        return cell ? 0 : 1;
       });
     });
     return result;
