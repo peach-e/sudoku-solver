@@ -84,15 +84,13 @@ sudoku.program = function() {
    */
   function _initializeSolutionGrid() {
 
-    var vals = _solver.getSolutionMatrix();
+    var matrix = _solver.getSolutionMatrix();
 
-    for (var row = 0; row < 9; row++) {
-      for (var col = 0; col < 9; col++) {
-        var val = vals[row][col];
-        _solveNumber(val, row, col);
-      }
-    }
+    matrix.iterateOverRowAndColumn(function(row, col, sq, val) {
+      _solveNumber(val, row, col);
+    });
   }
+
   /**
    * Removes solution grids.
    */
@@ -160,13 +158,11 @@ sudoku.program = function() {
     // Get the data.
     var userInputData = sudoku.grid.getInputGridValues(_userInputGridId);
 
-    // Override with mocked data.
-    // userInputData = _mockout_data();
+    var inputMatrix = new sudoku.math.Matrix(userInputData);
 
     // Attempt to create the solver with the data.
     try {
-      _solver = sudoku.solver.create(userInputData, _excludeNumber,
-          _solveNumber);
+      _solver = sudoku.solver.create(inputMatrix, _excludeNumber, _solveNumber);
     } catch (e) {
       // On fail, show alert and cancel the mode switch.
       console.error(e);

@@ -9,29 +9,12 @@
  **********************************************************************
  */
 
-// MATRIX CONVENTIONS
-// -------------------------
-// All matrices are assumed to be 9 x 9, organized by [Row, Col].
-//
-// Sometimes squares are directly referenced. Squares are addressed according to
-// the convention:
-//
-// +---+---+---+
-// | 0 | 1 | 2 |
-// +---+---+---+
-// | 3 | 4 | 5 |
-// +---+---+---+
-// | 6 | 7 | 8 |
-// +---+---+---+
-//
-// So the number in row/col [0][4] would be at the top of square 1.
-//
 var esp = {};
 var sudoku = sudoku || {};
 sudoku.implementation = sudoku.implementation || {};
 sudoku.implementation.solver = sudoku.implementation.solver || {};
 sudoku.implementation.solver.algorithm = function() {
-  function create(inputData, excludeNumberCallback, solveNumberCallback) {
+  function create(inputMatrix, excludeNumberCallback, solveNumberCallback) {
 
     var solver = {};
 
@@ -58,10 +41,10 @@ sudoku.implementation.solver.algorithm = function() {
     // -----------------------
     // The solution matrix is a 9x9 grid that contains either null values or
     // the numbers that are known to be part of the solution. During
-    // construction, it gets initialized with the inputData, and as numbers
+    // construction, it gets initialized with the inputMatrix, and as numbers
     // are solved, it gets filled in.
     //
-    var _solutionMatrix = _cloneSolutionMatrix(inputData);
+    var _solutionMatrix = inputMatrix.clone();
 
     // EXCLUSION MATRIX
     // -----------------------
@@ -88,7 +71,7 @@ sudoku.implementation.solver.algorithm = function() {
      * Returns a clone of the current matrix of solved values.
      */
     solver.getSolutionMatrix = function() {
-      return _cloneSolutionMatrix(_solutionMatrix);
+      return _solutionMatrix.clone();
     }
 
     /**
@@ -641,18 +624,20 @@ sudoku.implementation.solver.algorithm = function() {
      * Makes sure the input data is valid. If it's not, abort construction.
      */
     function _validate() {
-      for (var row = 0; row < 9; row++) {
-        for (var col = 0; col < 9; col++) {
-          var number = _solutionMatrix[row][col];
-          if (number) {
-            var isValid = _isStrictlyUnique(_solutionMatrix, number, row, col);
-            if (!isValid) {
-              throw "Invalid solution found in Matrix, near number '" + number + "' in row '"
-                  + (row + 1) + "' and column '" + (col + 1) + "'.";
-            }
+      /*
+       * 
+       * for each filled in spot on the matrix, the value must be unique on row
+       * and column.
+       */
+      _solutionMatrix.iterateOverRowAndColumn(function(row, col, sq, val) {
+        if (val !== null) {
+          var isValid = _solutionMatrix.isStrictlyUnique(row, col);
+          if (!isValid) {
+            throw "Invalid solution found in Matrix, near number '" + number + "' in row '"
+                + (row + 1) + "' and column '" + (col + 1) + "'.";
           }
         }
-      }
+      });
     }
 
     _validate();

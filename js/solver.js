@@ -25,7 +25,7 @@ sudoku.solver = sudoku.solver = function() {
      * 
      * @param inputData
      *          {sudoku.math.Matrix} The initial data that is used to form the
-     *          solution matrix. Unknown values shoudld be set to null.
+     *          solution matrix. Unknown values should be set to null.
      * @param excludeNumberCallback
      *          {function} The callback is called when a number is excluded from
      *          a specific spot, passing back (number, row, col) as arguments.
