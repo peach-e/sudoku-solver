@@ -59,14 +59,14 @@ sudoku.program = function() {
    */
   function _drawSolutionGrids() {
     // Draw the Total View Grid.
-    sudoku.implementation.grid.drawer.drawGrid(gridIds.VIEW_TOTAL, wrapperIds.VIEW_TOTAL);
+    sudoku.grid.drawGrid(gridIds.VIEW_TOTAL, wrapperIds.VIEW_TOTAL);
 
     // Draw the rest of 'em.
     for (var i = 1; i <= 9; i++) {
       var viewKey = "VIEW_" + i;
       var gridId = gridIds[viewKey];
       var wrapperId = wrapperIds[viewKey];
-      sudoku.implementation.grid.drawer.drawGrid(gridId, wrapperId);
+      sudoku.grid.drawGrid(gridId, wrapperId);
     }
   }
 
@@ -76,7 +76,7 @@ sudoku.program = function() {
    */
   function _excludeNumber(number, row, col) {
     var gridId = gridIds["VIEW_" + number];
-    sudoku.implementation.grid.manipulation.setCellColor(gridId, row, col, '#FF7777');
+    sudoku.grid.setCellColor(gridId, row, col, '#FF7777');
   }
 
   /**
@@ -119,7 +119,7 @@ sudoku.program = function() {
    */
   function _solveNumber(number, row, col) {
     var gridId = gridIds.VIEW_TOTAL;
-    sudoku.implementation.grid.manipulation.setCellValue(gridId, row, col, number);
+    sudoku.grid.setCellValue(gridId, row, col, number);
   }
 
   /*
@@ -128,7 +128,7 @@ sudoku.program = function() {
   function clearInputs() {
     if (confirm('You sure you want to clear the inputs?')) {
       window.localStorage.removeItem(_localStorageToken);
-      sudoku.implementation.grid.userGrid.clearInputGridValues(_userInputGridId);
+      sudoku.grid.clearInputGridValues(_userInputGridId);
     }
   }
 
@@ -145,20 +145,20 @@ sudoku.program = function() {
     // If the user input grid still exists, keep it. Otherwise,
     // Draw a new one.
     if (!document.getElementById(_userInputGridId)) {
-      sudoku.implementation.grid.userGrid.drawInputGrid(_userInputGridId, _userInputWrapperId);
+      sudoku.grid.drawInputGrid(_userInputGridId, _userInputWrapperId);
     }
 
     // Populate the grid with saved values if we can.
     var savedArrayJSON = window.localStorage.getItem(_localStorageToken);
     if (savedArrayJSON) {
       var savedArray = JSON.parse(savedArrayJSON);
-      sudoku.implementation.grid.userGrid.setInputGridValues(_userInputGridId, savedArray);
+      sudoku.grid.setInputGridValues(_userInputGridId, savedArray);
     }
   }
 
   function enterSolveMode() {
     // Get the data.
-    var userInputData = sudoku.implementation.grid.userGrid.getInputGridValues(_userInputGridId);
+    var userInputData = sudoku.grid.getInputGridValues(_userInputGridId);
 
     // Override with mocked data.
     // userInputData = _mockout_data();
