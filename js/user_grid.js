@@ -20,7 +20,8 @@ sudoku.UserGrid = function() {
   function _getGrid(gridId) {
     var grid = document.getElementById(gridId);
     if (!grid
-        || !grid.classList.contains(sudoku.implementation.grid.constants.CLASS_SUDOKUGRID)) {
+        || !grid.classList
+            .contains(sudoku.implementation.grid.constants.CLASS_SUDOKUGRID)) {
       console.error('No valid grid by name "' + gridId + '"');
       return;
     }
@@ -31,7 +32,7 @@ sudoku.UserGrid = function() {
    * Public Functions
    */
 
-  function drawGrid(gridId, wrappingDivElementId) {
+  function drawInputGrid(gridId, wrappingDivElementId) {
 
     // Draw the grid,
     sudoku.implementation.grid.drawer.drawGrid(gridId, wrappingDivElementId);
@@ -50,7 +51,7 @@ sudoku.UserGrid = function() {
     }
   }
 
-  function clearInputValues(gridId) {
+  function clearInputGridValues(gridId) {
     var grid = _getGrid(gridId);
     if (!grid) {
       return;
@@ -64,7 +65,7 @@ sudoku.UserGrid = function() {
     }
   }
 
-  function getInputValues(gridId) {
+  function getInputGridValues(gridId) {
     var grid = _getGrid(gridId);
     if (!grid) {
       return;
@@ -76,7 +77,8 @@ sudoku.UserGrid = function() {
       result.push([]);
       for (var j = 0; j < 9; j++) {
         // Get the value
-        var value = sudoku.implementation.grid.manipulation.readTextBox(gridId, i, j);
+        var value = sudoku.implementation.grid.manipulation.readTextBox(gridId,
+            i, j);
 
         // Make sure we're doing it right.
         if (value === null) {
@@ -93,7 +95,7 @@ sudoku.UserGrid = function() {
     return result;
   }
 
-  function setInputValues(gridId, numberArray) {
+  function setInputGridValues(gridId, numberArray) {
     var grid = _getGrid(gridId);
     if (!grid) {
       return;
@@ -102,7 +104,8 @@ sudoku.UserGrid = function() {
     // For each row and column, write values.
     for (var i = 0; i < 9; i++) {
       for (var j = 0; j < 9; j++) {
-        sudoku.implementation.grid.manipulation.writeTextBox(gridId, i, j, numberArray[i][j]);
+        sudoku.implementation.grid.manipulation.writeTextBox(gridId, i, j,
+            numberArray[i][j]);
       }
     }
   }
@@ -123,17 +126,18 @@ sudoku.UserGrid = function() {
      * @param gridId
      *          The ID of the grid to write to.
      */
-    clearInputValues : clearInputValues,
+    clearInputGridValues : clearInputGridValues,
 
     /**
-     * Draws a styled Sudoku Grid inside the specified DIV element.
+     * Draws a Sudoku Grid inside the specified DIV element with text fields
+     * where numbers can be written.
      * 
      * @param gridId
      *          {string} the ID to give the new grid.wrappingDivElementId
      * @param wrappingDivElementId
      *          {node} The ID of the wrapping DIV element to place the grid.
      */
-    drawGrid : drawGrid,
+    drawInputGrid : drawInputGrid,
 
     /**
      * Reads a textbox grid into an array.
@@ -141,7 +145,7 @@ sudoku.UserGrid = function() {
      * @param gridId
      *          {string} the ID of grid to read info from.
      */
-    getInputValues : getInputValues,
+    getInputGridValues : getInputGridValues,
 
     /**
      * Writes a 9x9 array into the textbox grid.
@@ -151,7 +155,7 @@ sudoku.UserGrid = function() {
      * @param numberArray
      *          The array of numbers to populate.
      */
-    setInputValues : setInputValues,
+    setInputGridValues : setInputGridValues,
 
     /**
      * Removes a grid with the specified gridId.
