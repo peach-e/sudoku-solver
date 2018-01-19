@@ -1,6 +1,6 @@
 /*
  **********************************************************************
- *  File   : CrossNumberExclusion.js
+ *  File   : cross_number_exclusion.js
  *  Author : peach
  *  Date   : 15 January 2018
  *
@@ -34,7 +34,9 @@
 // already).
 //
 var sudoku = sudoku || {};
-sudoku.CrossNumberExclusion = function() {
+sudoku.implementation = sudoku.implementation || {};
+sudoku.implementation.solver = sudoku.implementation.solver || {};
+sudoku.implementation.solver.crossNumberExclusion = function() {
 
   /*
    * Public Methods
@@ -82,7 +84,7 @@ sudoku.CrossNumberExclusion = function() {
          * satisfy the theorem if and only if there are no discrepencies on that
          * same row/column/square.
          */
-        var discrepencyMatrix = _getEmptyGrid(9, 9);
+        var discrepencyMatrix = new sudoku.math.Matrix(0);
 
         // Build up the discrepency matrix by diffing our first number's
         // exclusion matrix with all the others in the set.
@@ -92,9 +94,8 @@ sudoku.CrossNumberExclusion = function() {
           var a = exclusionMatrix[chosenNumber - 1];
           var b = exclusionMatrix[alternateNumber - 1];
 
-          var discrepencyAB = _exclusion_XOR_exclusion(a, b);
-          discrepencyMatrix = _exclusion_OR_exclusion(discrepencyAB,
-              discrepencyMatrix);
+          var discrepencyAB = a.XOR_with(b);
+          discrepencyMatrix = discrepencyMatrix.OR_with(discrepencyAB);
         }
 
         // On my chosen number, I now go through each possibility.
@@ -105,14 +106,13 @@ sudoku.CrossNumberExclusion = function() {
         // ......equals our number of chosen numbers (r), then
         // it should be safe to exclude all numbersNotChosen from those spots.
         var chosenNumberExclusionMatrix = exclusionMatrix[chosenNumber - 1];
-        var chosenNumberPossibilityMatrix = _invertExclusionMatrix(chosenNumberExclusionMatrix);
+        var chosenNumberPossibilityMatrix = chosenNumberExclusionMatrix.booleanCompliment();
 
         /*
          * Get lists of all possibilities and discrepencies to check.
          */
-        var possibilities = _getOccurrancesInMatrix(
-            chosenNumberPossibilityMatrix, true);
-        var discrepencies = _getOccurrancesInMatrix(discrepencyMatrix, true);
+        var possibilities = chosenNumberPossibilityMatrix.getOccurrancesOfValue(1);
+        var discrepencies = discrepencyMatrix.getOccurrancesOfValue(1);
 
         /*
          * For each possibility, look for an opportunity to perform the
@@ -139,16 +139,13 @@ sudoku.CrossNumberExclusion = function() {
           var possibilitiesOnRow = _filterOnKey(possibilities, 'row', row);
           var discrepenciesOnRow = _filterOnKey(discrepencies, 'row', row);
 
-          if (possibilitiesOnRow.length === r
-              && discrepenciesOnRow.length === 0) {
+          if (possibilitiesOnRow.length === r && discrepenciesOnRow.length === 0) {
             // Get our numbers to exclude.
-            excludeArray = _getExcludeObjectArray(numbersNotChosen,
-                possibilitiesOnRow);
+            excludeArray = _getExcludeObjectArray(numbersNotChosen, possibilitiesOnRow);
 
             // Only return if the numbers to exclude aren't already excluded
             // there.
-            newNumbersToExclude = _doesExcludeArrayHaveNewData(excludeArray,
-                exclusionMatrix);
+            newNumbersToExclude = _doesExcludeArrayHaveNewData(excludeArray, exclusionMatrix);
             if (newNumbersToExclude) {
               return excludeArray;
             }
@@ -160,12 +157,9 @@ sudoku.CrossNumberExclusion = function() {
           var possibilitiesOnCol = _filterOnKey(possibilities, 'col', col);
           var discrepenciesOnCol = _filterOnKey(discrepencies, 'col', col);
 
-          if (possibilitiesOnCol.length === r
-              && discrepenciesOnCol.length === 0) {
-            excludeArray = _getExcludeObjectArray(numbersNotChosen,
-                possibilitiesOnCol);
-            newNumbersToExclude = _doesExcludeArrayHaveNewData(excludeArray,
-                exclusionMatrix);
+          if (possibilitiesOnCol.length === r && discrepenciesOnCol.length === 0) {
+            excludeArray = _getExcludeObjectArray(numbersNotChosen, possibilitiesOnCol);
+            newNumbersToExclude = _doesExcludeArrayHaveNewData(excludeArray, exclusionMatrix);
             if (newNumbersToExclude) {
               return excludeArray;
             }
@@ -174,17 +168,12 @@ sudoku.CrossNumberExclusion = function() {
           /**
            * -------------------- EXCLUSION BY SQUARE --------------------
            */
-          var possibilitiesOnSquare = _filterOnKey(possibilities, 'square',
-              square);
-          var discrepenciesOnSquare = _filterOnKey(discrepencies, 'square',
-              square);
+          var possibilitiesOnSquare = _filterOnKey(possibilities, 'square', square);
+          var discrepenciesOnSquare = _filterOnKey(discrepencies, 'square', square);
 
-          if (possibilitiesOnSquare.length === r
-              && discrepenciesOnSquare.length === 0) {
-            excludeArray = _getExcludeObjectArray(numbersNotChosen,
-                possibilitiesOnSquare);
-            newNumbersToExclude = _doesExcludeArrayHaveNewData(excludeArray,
-                exclusionMatrix);
+          if (possibilitiesOnSquare.length === r && discrepenciesOnSquare.length === 0) {
+            excludeArray = _getExcludeObjectArray(numbersNotChosen, possibilitiesOnSquare);
+            newNumbersToExclude = _doesExcludeArrayHaveNewData(excludeArray, exclusionMatrix);
             if (newNumbersToExclude) {
               return excludeArray;
             }
@@ -213,62 +202,11 @@ sudoku.CrossNumberExclusion = function() {
       var col = excludeArray[i].col;
       var number = excludeArray[i].number;
 
-      if (!exclusionMatrix[number - 1][row][col]) {
+      if (!exclusionMatrix[number - 1].get(row, col)) {
         result = 1;
         break;
       }
     }
-    return result;
-  }
-
-  /**
-   * TODO: Should be matrix method.
-   * 
-   * Given 2 exclusion matrices (both 9x9), performs an OR operation where each
-   * cell is 1 if either inputs are 1.
-   */
-  function _exclusion_OR_exclusion(a, b) {
-    var result = _getEmptyGrid(9, 9);
-    for (var i = 0; i < 9; i++) {
-      for (var j = 0; j < 9; j++) {
-        // cast to boolean just to be safe.
-        var aCell = a[i][j] > 0 ? true : false;
-        var bCell = b[i][j] > 0 ? true : false;
-        result[i][j] = (aCell || bCell);
-      }
-    }
-
-    return result;
-  }
-
-  /**
-   * TODO: Refactor into Matrix class. Gets the square for the specified row and
-   * column.
-   */
-  function _getSquareForRowColumn(row, col) {
-    var rGroup = Math.floor(row / 3);
-    var cGroup = Math.floor(col / 3);
-    var result = rGroup * 3 + cGroup;
-    return result;
-  }
-
-  /**
-   * TODO: Should be matrix method.
-   * 
-   * Given 2 exclusion matrices (both 9x9), performs an exclusive-or operation
-   * where each cell is 1 if both inputs match and 0 if they don't.
-   */
-  function _exclusion_XOR_exclusion(a, b) {
-    var result = _getEmptyGrid(9, 9);
-    for (var i = 0; i < 9; i++) {
-      for (var j = 0; j < 9; j++) {
-        // cast to boolean just to be safe.
-        var aCell = a[i][j] > 0 ? true : false;
-        var bCell = b[i][j] > 0 ? true : false;
-        result[i][j] = ((aCell && !bCell) || (!aCell && bCell));
-      }
-    }
-
     return result;
   }
 
@@ -313,10 +251,9 @@ sudoku.CrossNumberExclusion = function() {
          * Get combinations for the the remaining elements in the array, and
          * join each combination onto the first one as a new result.
          */
-        _getCombinations(arr.slice(i + 1), r - 1).forEach(
-            function(remainingCombination) {
-              return combinations.push(result.concat(remainingCombination));
-            });
+        _getCombinations(arr.slice(i + 1), r - 1).forEach(function(remainingCombination) {
+          return combinations.push(result.concat(remainingCombination));
+        });
       } else {
         /*
          * If r==1, then the single member of result is all there is.
@@ -325,23 +262,6 @@ sudoku.CrossNumberExclusion = function() {
       }
     }
     return combinations;
-  }
-
-  /**
-   * TODO: Should be MxM, and should specify default value as matrix
-   * constructor.
-   * 
-   * Generates an empty grid (M x N).
-   */
-  function _getEmptyGrid(M, N) {
-    var result = [];
-    for (let i = 0; i < M; i++) {
-      result.push([]);
-      for (let j = 0; j < N; j++) {
-        result[i].push(0);
-      }
-    }
-    return result;
   }
 
   /**
@@ -359,44 +279,6 @@ sudoku.CrossNumberExclusion = function() {
           col : poss.col
         };
         result.push(obj);
-      });
-    });
-    return result;
-  }
-
-  /**
-   * TODO: Refactor this into the matrix object when the time comes. Gets the
-   * occurrances of a value in an MxM matrix. All occurrances are returned as an
-   * array of hashes where each occurrance has row, col and Square. The Square
-   * convention follows the convention discussed at the top.
-   */
-  function _getOccurrancesInMatrix(matrix, soughtValue) {
-    var occurrances = [];
-    for (var row = 0; row < 9; row++) {
-      for (var col = 0; col < 9; col++) {
-        var value = matrix[row][col];
-        if (value != soughtValue)
-          continue;
-        var square = _getSquareForRowColumn(row, col);
-        occurrances.push({
-          row : row,
-          col : col,
-          square : square
-        });
-      }
-    }
-    return occurrances;
-  }
-
-  /**
-   * TODO: Should be a matrix operation.
-   * 
-   * Inverts an exclusionMatrix matrix ([M x N])
-   */
-  function _invertExclusionMatrix(matrix) {
-    var result = matrix.map(function(row) {
-      return row.map(function(cell) {
-        return cell ? 0 : 1;
       });
     });
     return result;

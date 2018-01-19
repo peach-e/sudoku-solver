@@ -59,14 +59,14 @@ sudoku.program = function() {
    */
   function _drawSolutionGrids() {
     // Draw the Total View Grid.
-    sudoku.grid.drawer.drawGrid(gridIds.VIEW_TOTAL, wrapperIds.VIEW_TOTAL);
+    sudoku.grid.drawGrid(gridIds.VIEW_TOTAL, wrapperIds.VIEW_TOTAL);
 
     // Draw the rest of 'em.
     for (var i = 1; i <= 9; i++) {
       var viewKey = "VIEW_" + i;
       var gridId = gridIds[viewKey];
       var wrapperId = wrapperIds[viewKey];
-      sudoku.grid.drawer.drawGrid(gridId, wrapperId);
+      sudoku.grid.drawGrid(gridId, wrapperId);
     }
   }
 
@@ -76,7 +76,7 @@ sudoku.program = function() {
    */
   function _excludeNumber(number, row, col) {
     var gridId = gridIds["VIEW_" + number];
-    sudoku.grid.manipulation.setCellColor(gridId, row, col, '#FF7777');
+    sudoku.grid.setCellColor(gridId, row, col, '#FF7777');
   }
 
   /**
@@ -84,15 +84,13 @@ sudoku.program = function() {
    */
   function _initializeSolutionGrid() {
 
-    var vals = _solver.getMatrixValues();
+    var matrix = _solver.getSolutionMatrix();
 
-    for (var row = 0; row < 9; row++) {
-      for (var col = 0; col < 9; col++) {
-        var val = vals[row][col];
-        _solveNumber(val, row, col);
-      }
-    }
+    matrix.iterateOverRowAndColumn(function(row, col, sq, val) {
+      _solveNumber(val, row, col);
+    });
   }
+
   /**
    * Removes solution grids.
    */
@@ -119,7 +117,7 @@ sudoku.program = function() {
    */
   function _solveNumber(number, row, col) {
     var gridId = gridIds.VIEW_TOTAL;
-    sudoku.grid.manipulation.setCellValue(gridId, row, col, number);
+    sudoku.grid.setCellValue(gridId, row, col, number);
   }
 
   /*
@@ -128,7 +126,7 @@ sudoku.program = function() {
   function clearInputs() {
     if (confirm('You sure you want to clear the inputs?')) {
       window.localStorage.removeItem(_localStorageToken);
-      sudoku.UserGrid.clearInputValues(_userInputGridId);
+      sudoku.grid.clearInputGridValues(_userInputGridId);
     }
   }
 
@@ -145,28 +143,26 @@ sudoku.program = function() {
     // If the user input grid still exists, keep it. Otherwise,
     // Draw a new one.
     if (!document.getElementById(_userInputGridId)) {
-      sudoku.UserGrid.drawGrid(_userInputGridId, _userInputWrapperId);
+      sudoku.grid.drawInputGrid(_userInputGridId, _userInputWrapperId);
     }
 
     // Populate the grid with saved values if we can.
     var savedArrayJSON = window.localStorage.getItem(_localStorageToken);
     if (savedArrayJSON) {
       var savedArray = JSON.parse(savedArrayJSON);
-      sudoku.UserGrid.setInputValues(_userInputGridId, savedArray);
+      sudoku.grid.setInputGridValues(_userInputGridId, savedArray);
     }
   }
 
   function enterSolveMode() {
     // Get the data.
-    var userInputData = sudoku.UserGrid.getInputValues(_userInputGridId);
+    var userInputData = sudoku.grid.getInputGridValues(_userInputGridId);
 
-    // Override with mocked data.
-    // userInputData = _mockout_data();
+    var inputMatrix = new sudoku.math.Matrix(userInputData);
 
     // Attempt to create the solver with the data.
     try {
-      _solver = sudoku.solver.create(userInputData, _excludeNumber,
-          _solveNumber);
+      _solver = sudoku.solver.create(inputMatrix, _excludeNumber, _solveNumber);
     } catch (e) {
       // On fail, show alert and cancel the mode switch.
       console.error(e);

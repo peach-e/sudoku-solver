@@ -17,31 +17,26 @@ var BUTTON_SOLVE_ALL_ID = 'solve-all';
 sudoku.program.setup();
 
 // Button Event Listeners
-document.getElementById(BUTTON_BEGIN_ID).addEventListener('click',
-    sudoku.program.enterSolveMode);
+document.getElementById(BUTTON_BEGIN_ID).addEventListener('click', sudoku.program.enterSolveMode);
 document.getElementById(BUTTON_RETURN_ID).addEventListener('click',
     sudoku.program.enterDataInputMode);
-document.getElementById(BUTTON_ADVANCE_STEP_ID).addEventListener('click',
-    sudoku.program.next);
-document.getElementById(BUTTON_SOLVE_ALL_ID).addEventListener('click',
-    sudoku.program.solveAll);
-document.getElementById(BUTTON_CLEAR_ID).addEventListener('click',
-    sudoku.program.clearInputs);
+document.getElementById(BUTTON_ADVANCE_STEP_ID).addEventListener('click', sudoku.program.next);
+document.getElementById(BUTTON_SOLVE_ALL_ID).addEventListener('click', sudoku.program.solveAll);
+document.getElementById(BUTTON_CLEAR_ID).addEventListener('click', sudoku.program.clearInputs);
 
-// Keyboard event listener to advance to next cell on data input.
-
-
-
-sudoku.grid.drawer.drawGrid('debug', 'debug-wrapper');
+/*
+ * Debug functions.
+ */
+sudoku.grid.drawGrid('debug', 'debug-wrapper');
 
 function debugRowCol(row, col) {
-  sudoku.grid.manipulation.setCellColor('debug', row, col, '#77FF77');
+  sudoku.grid.setCellColor('debug', row, col, '#77FF77');
 }
 
 function debugClear() {
   for (var i = 0; i < 9; i++) {
     for (var j = 0; j < 9; j++) {
-      sudoku.grid.manipulation.setCellColor('debug', i, j, '#ffffff');
+      sudoku.grid.setCellColor('debug', i, j, '#ffffff');
     }
   }
 }
