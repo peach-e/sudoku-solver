@@ -183,6 +183,38 @@ sudoku.implementation.math.Matrix = function(constructorArgument) {
     _data[row][col] = value;
   }
 
+  /**
+   * Performs OR operation.
+   */
+  function OR_with(otherMatrix) {
+    var result = new self.constructor(0);
+
+    result.iterateOverRowAndColumn(function(row, col, sq, val) {
+      var a = self.get(row, col);
+      var b = otherMatrix.get(row, col);
+      if (a || b) {
+        result.set(row, col, 1);
+      }
+    });
+    return result;
+  }
+
+  /**
+   * Performs XOR operation.
+   */
+  function XOR_with(otherMatrix) {
+    var result = new self.constructor(0);
+
+    result.iterateOverRowAndColumn(function(row, col, sq, val) {
+      var a = self.get(row, col);
+      var b = otherMatrix.get(row, col);
+      if ((a && !b) || (b && !a)) {
+        result.set(row, col, 1);
+      }
+    });
+    return result;
+  }
+
   /*
    * Private Methods
    */
@@ -328,6 +360,27 @@ sudoku.implementation.math.Matrix = function(constructorArgument) {
    *          the value to write to that spot.
    */
   self.set = set;
+
+  /**
+   * Performs a cell-by-cell OR operation with another matrix.
+   * 
+   * @param otherMatrix
+   *          the other matrix.
+   * @param result
+   *          a boolean matrix where each cell is 1 if a OR b, and 0 otherwise.
+   */
+  self.OR_with = OR_with;
+
+  /**
+   * Performs a cell-by-cell XOR operation with another matrix.
+   * 
+   * @param otherMatrix
+   *          the other matrix.
+   * @param result
+   *          a boolean matrix where each cell is 1 if (a OR b - but not both),
+   *          and 0 otherwise.
+   */
+  self.XOR_with = XOR_with;
 
   self.data = _data;
 };

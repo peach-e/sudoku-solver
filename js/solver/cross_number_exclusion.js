@@ -84,7 +84,7 @@ sudoku.implementation.solver.crossNumberExclusion = function() {
          * satisfy the theorem if and only if there are no discrepencies on that
          * same row/column/square.
          */
-        var discrepencyMatrix = _getEmptyGrid(9, 9);
+        var discrepencyMatrix = new sudoku.math.Matrix(0);
 
         // Build up the discrepency matrix by diffing our first number's
         // exclusion matrix with all the others in the set.
@@ -94,9 +94,8 @@ sudoku.implementation.solver.crossNumberExclusion = function() {
           var a = exclusionMatrix[chosenNumber - 1];
           var b = exclusionMatrix[alternateNumber - 1];
 
-          var discrepencyAB = _exclusion_XOR_exclusion(a, b);
-          discrepencyMatrix = _exclusion_OR_exclusion(discrepencyAB,
-              discrepencyMatrix);
+          var discrepencyAB = a.XOR_with(b);
+          discrepencyMatrix = discrepencyMatrix.OR_with(discrepencyAB);
         }
 
         // On my chosen number, I now go through each possibility.
@@ -107,14 +106,13 @@ sudoku.implementation.solver.crossNumberExclusion = function() {
         // ......equals our number of chosen numbers (r), then
         // it should be safe to exclude all numbersNotChosen from those spots.
         var chosenNumberExclusionMatrix = exclusionMatrix[chosenNumber - 1];
-        var chosenNumberPossibilityMatrix = _invertExclusionMatrix(chosenNumberExclusionMatrix);
+        var chosenNumberPossibilityMatrix = chosenNumberExclusionMatrix.booleanCompliment();
 
         /*
          * Get lists of all possibilities and discrepencies to check.
          */
-        var possibilities = _getOccurrancesInMatrix(
-            chosenNumberPossibilityMatrix, true);
-        var discrepencies = _getOccurrancesInMatrix(discrepencyMatrix, true);
+        var possibilities = chosenNumberPossibilityMatrix.getOccurrancesOfValue(1);
+        var discrepencies = discrepencyMatrix.getOccurrancesOfValue(1);
 
         /*
          * For each possibility, look for an opportunity to perform the
@@ -141,16 +139,13 @@ sudoku.implementation.solver.crossNumberExclusion = function() {
           var possibilitiesOnRow = _filterOnKey(possibilities, 'row', row);
           var discrepenciesOnRow = _filterOnKey(discrepencies, 'row', row);
 
-          if (possibilitiesOnRow.length === r
-              && discrepenciesOnRow.length === 0) {
+          if (possibilitiesOnRow.length === r && discrepenciesOnRow.length === 0) {
             // Get our numbers to exclude.
-            excludeArray = _getExcludeObjectArray(numbersNotChosen,
-                possibilitiesOnRow);
+            excludeArray = _getExcludeObjectArray(numbersNotChosen, possibilitiesOnRow);
 
             // Only return if the numbers to exclude aren't already excluded
             // there.
-            newNumbersToExclude = _doesExcludeArrayHaveNewData(excludeArray,
-                exclusionMatrix);
+            newNumbersToExclude = _doesExcludeArrayHaveNewData(excludeArray, exclusionMatrix);
             if (newNumbersToExclude) {
               return excludeArray;
             }
@@ -162,12 +157,9 @@ sudoku.implementation.solver.crossNumberExclusion = function() {
           var possibilitiesOnCol = _filterOnKey(possibilities, 'col', col);
           var discrepenciesOnCol = _filterOnKey(discrepencies, 'col', col);
 
-          if (possibilitiesOnCol.length === r
-              && discrepenciesOnCol.length === 0) {
-            excludeArray = _getExcludeObjectArray(numbersNotChosen,
-                possibilitiesOnCol);
-            newNumbersToExclude = _doesExcludeArrayHaveNewData(excludeArray,
-                exclusionMatrix);
+          if (possibilitiesOnCol.length === r && discrepenciesOnCol.length === 0) {
+            excludeArray = _getExcludeObjectArray(numbersNotChosen, possibilitiesOnCol);
+            newNumbersToExclude = _doesExcludeArrayHaveNewData(excludeArray, exclusionMatrix);
             if (newNumbersToExclude) {
               return excludeArray;
             }
@@ -176,17 +168,12 @@ sudoku.implementation.solver.crossNumberExclusion = function() {
           /**
            * -------------------- EXCLUSION BY SQUARE --------------------
            */
-          var possibilitiesOnSquare = _filterOnKey(possibilities, 'square',
-              square);
-          var discrepenciesOnSquare = _filterOnKey(discrepencies, 'square',
-              square);
+          var possibilitiesOnSquare = _filterOnKey(possibilities, 'square', square);
+          var discrepenciesOnSquare = _filterOnKey(discrepencies, 'square', square);
 
-          if (possibilitiesOnSquare.length === r
-              && discrepenciesOnSquare.length === 0) {
-            excludeArray = _getExcludeObjectArray(numbersNotChosen,
-                possibilitiesOnSquare);
-            newNumbersToExclude = _doesExcludeArrayHaveNewData(excludeArray,
-                exclusionMatrix);
+          if (possibilitiesOnSquare.length === r && discrepenciesOnSquare.length === 0) {
+            excludeArray = _getExcludeObjectArray(numbersNotChosen, possibilitiesOnSquare);
+            newNumbersToExclude = _doesExcludeArrayHaveNewData(excludeArray, exclusionMatrix);
             if (newNumbersToExclude) {
               return excludeArray;
             }
@@ -215,7 +202,7 @@ sudoku.implementation.solver.crossNumberExclusion = function() {
       var col = excludeArray[i].col;
       var number = excludeArray[i].number;
 
-      if (!exclusionMatrix[number - 1][row][col]) {
+      if (!exclusionMatrix[number - 1].get(row, col)) {
         result = 1;
         break;
       }
@@ -315,10 +302,9 @@ sudoku.implementation.solver.crossNumberExclusion = function() {
          * Get combinations for the the remaining elements in the array, and
          * join each combination onto the first one as a new result.
          */
-        _getCombinations(arr.slice(i + 1), r - 1).forEach(
-            function(remainingCombination) {
-              return combinations.push(result.concat(remainingCombination));
-            });
+        _getCombinations(arr.slice(i + 1), r - 1).forEach(function(remainingCombination) {
+          return combinations.push(result.concat(remainingCombination));
+        });
       } else {
         /*
          * If r==1, then the single member of result is all there is.
